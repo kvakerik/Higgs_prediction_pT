@@ -76,8 +76,6 @@ class DatasetConstructor():
 
 
 
-
-
 if __name__ == "__main__":
     datasetConstructor = DatasetConstructor()
     datasetConstructor.processTTrees()
