@@ -41,7 +41,7 @@ class DatasetConstructor():
         #print(f"imported background files: {files_bkg}")
         return files_sig, files_bkg
 
-    def loadAndConvertToTensors(self):
+    def buildDataset(self):
         # Import files
         files_sig, files_bkg = self.importFiles()
         all_files = files_sig + files_bkg  # Combine signal and background
@@ -80,14 +80,30 @@ class DatasetConstructor():
             tensors.append(tensor_stack)
             n_evt += tensor_stack.shape[0]
 
-            print(f"File {file} processed with tensor shape: {tensor_stack.shape}")
+            #print(f"File {file} processed with tensor shape: {tensor_stack.shape}")
             n_events.append(n_evt)
-
+        
         #print("Total tensors processed:", tensors)
         print("Total events", np.sum(n_events))
+        print(f"Length of tensor lists {len(tensors)}")
+        datasets = []
+        for tensors_sample in tensors:
+                # Create a dataset from each individual tensor file
+                #print(type(tensors_sample))
+                #print(len(tensors_sample))
+                print("Vytváram TF dataset")
+                dataset = tf.data.Dataset.from_tensor_slices((tensors_sample))
+                datasets.append(dataset)
+        weights_list = []
+        print("Calculating weights")
+        weights_list = [tensor.shape[0] / total_events for tensor, total_events in zip(tensors, n_events)]
+        #print(weights_list)
+        dataset = tf.data.Dataset.sample_from_datasets(datasets, weights=weights_list)
+        print("Dataset Successfully imported")
+        return dataset, n_events
         
-        return tensors, n_events
-
 if __name__ == "__main__":
     datasetConstructor = DatasetConstructor()
-    tensors, n_events = datasetConstructor.loadAndConvertToTensors()
+    tensors, n_events = datasetConstructor.buildDataset()
+    print(tensors)
+
