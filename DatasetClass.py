@@ -85,17 +85,15 @@ class DatasetConstructor():
         
         #print("Total tensors processed:", tensors)
         print("Total events", np.sum(n_events))
-        print(f"Length of tensor lists {len(tensors)}")
+        #print(f"Length of tensor lists {len(tensors)}")
         datasets = []
         for tensors_sample in tensors:
                 # Create a dataset from each individual tensor file
                 #print(type(tensors_sample))
                 #print(len(tensors_sample))
-                print("Vytváram TF dataset")
                 dataset = tf.data.Dataset.from_tensor_slices((tensors_sample))
                 datasets.append(dataset)
         weights_list = []
-        print("Calculating weights")
         weights_list = [tensor.shape[0] / total_events for tensor, total_events in zip(tensors, n_events)]
         #print(weights_list)
         dataset = tf.data.Dataset.sample_from_datasets(datasets, weights=weights_list)
@@ -104,6 +102,6 @@ class DatasetConstructor():
         
 if __name__ == "__main__":
     datasetConstructor = DatasetConstructor()
-    tensors, n_events = datasetConstructor.buildDataset()
-    print(tensors)
+    dataset, n_events = datasetConstructor.buildDataset()
+   
 
