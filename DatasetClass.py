@@ -4,6 +4,7 @@ import uproot
 import glob
 import vector
 import awkward as ak
+import matplotlib.pyplot as plt 
 import numpy as np
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
@@ -41,7 +42,7 @@ class DatasetConstructor():
         #print(f"imported background files: {files_bkg}")
         return files_sig, files_bkg
 
-    def buildDataset(self):
+    def buildDataset(self, plot_variables : bool = False):
         # Import files
         files_sig, files_bkg = self.importFiles()
         all_files = files_sig + files_bkg  # Combine signal and background
@@ -75,6 +76,30 @@ class DatasetConstructor():
                 else:
                     tensors_var.append(tf.constant(ak.to_numpy(data[var]), dtype=tf.float32))
 
+
+            if plot_variables:
+                    # Convert components to numpy arrays
+                pt = ak.to_numpy(p4.rho)
+                eta = ak.to_numpy(p4.eta)
+                phi = ak.to_numpy(p4.phi)
+                mass = ak.to_numpy(p4.tau)
+
+                # Plot each component separately
+                for component, name in zip([pt, eta, phi, mass], ['pt', 'eta', 'phi', 'mass']):
+                    if component.size > 0 and np.issubdtype(component.dtype, np.number):
+                        plt.figure()
+                        plt.hist(component, bins=50, histtype='step', linestyle='-', linewidth=1.5)
+                        plt.title(f"Histogram of {var} - {name}")
+                        plt.xlabel(name)
+                        plt.ylabel("Events")
+                        plt.grid(True)
+                        plt.savefig(f"plots/variable_{name}_plot.pdf")
+                    else:
+                        print(f"Skipping plot for {var} - {name} due to non-numeric or empty data.")
+            else:
+                print("Plot variables is turned off")
+                        
+                
             # Stack tensors for each file
             tensor_stack = tf.stack(tensors_var, axis=1)
             tensors.append(tensor_stack)
@@ -102,6 +127,8 @@ class DatasetConstructor():
         
 if __name__ == "__main__":
     datasetConstructor = DatasetConstructor()
-    dataset, n_events = datasetConstructor.buildDataset()
+    dataset, n_events = datasetConstructor.buildDataset(plot_variables=True)
+
+    
    
 
