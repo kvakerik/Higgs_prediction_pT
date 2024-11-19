@@ -1,1 +1,0 @@
-print("Erik dava na main")
