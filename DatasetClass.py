@@ -168,12 +168,15 @@ class DatasetConstructor():
         
         dataset = tf.data.Dataset.sample_from_datasets(datasets, weights=weights_list)
         print("Dataset Successfully imported")
+        print(type(dataset))
+        for x in dataset.take(1):
+            print(x)    
         
         return dataset, n_events
         
 if __name__ == "__main__":
     datasetConstructor = DatasetConstructor()
-    dataset, n_events = datasetConstructor.buildDataset(plot_variables=True)
+    dataset, n_events = datasetConstructor.buildDataset(plot_variables=False)
 
     
    
