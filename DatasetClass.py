@@ -12,7 +12,7 @@ os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 tf.get_logger().setLevel('ERROR')
 gpus = tf.config.list_physical_devices('GPU')
-print("Available GPUs:", gpus)
+# print("Available GPUs:", gpus)
 
 path_sig = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*VBFH*.root"
 path_bkg = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*Ztt*.root"
@@ -25,12 +25,13 @@ variables_higgs = [
     "jet_1_p4",
     "dijet_p4",
     "met_p4", 
-    "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus",
+    "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus", 
+    "boson_0_truth_p4"
 ]
 
 class DatasetConstructor():
     def __init__(self): 
-        self.variable_names = variables_higgs 
+        self.variables_higgs = variables_higgs 
         self.path_sig = path_sig
         self.path_bkg = path_bkg
 
@@ -47,35 +48,54 @@ class DatasetConstructor():
         files_sig, files_bkg = self.importFiles()
         all_files = files_sig + files_bkg  # Combine signal and background
 
+        print(len(all_files))
+        
+        arrays = []
+        arrays_truth = []
+        
+        # Premena awkward arrays na tensorflow tensors s truth vektormi
         tensors = []
+        truth_vectors = []
         n_events = []
-
+        
         # Process each file individually
         for file in all_files:
-            print("Reading file", file)
+            # print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
-            data = f.arrays(self.variable_names, library="ak")
+            data = f.arrays(self.variables_higgs, library="ak")
 
-            tensors_var = []
-            n_evt = 0
+            arr = []
+            arr_truth = []
+        
 
-            # Process each variable and convert directly to tensor
-            for var in self.variable_names:
-                if 'p4' in var:
-                    # Extract 4-vector components
-                    p4 = vector.zip({
-                        'x': data[var]['fP']['fX'], 
-                        'y': data[var]['fP']['fY'], 
-                        'z': data[var]['fP']['fZ'],
-                        't': data[var]['fE']
-                    })
-                    tensors_var.extend([tf.constant(ak.to_numpy(p4.rho), dtype=tf.float32),  # pt
-                                        tf.constant(ak.to_numpy(p4.eta), dtype=tf.float32),  # eta
-                                        tf.constant(ak.to_numpy(p4.phi), dtype=tf.float32),  # phi
-                                        tf.constant(ak.to_numpy(p4.tau), dtype=tf.float32)]) # mass
+            for var in variables_higgs:
+                if ('p4' in var) and (var != "boson_0_truth_p4"):
+                    # We need to extract the 4-vector pt, eta, phi, mass
+                    p4 = vector.zip({'x':data[var]['fP']['fX'], 
+                                    'y':data[var]['fP']['fY'], 
+                                    'z':data[var]['fP']['fZ'],
+                                    't':data[var]['fE']})
+                    
+                    arr.append(p4.rho) # pt
+                    arr.append(p4.eta) # eta
+                    arr.append(p4.phi) # phi
+                    arr.append(p4.tau) # mass
+
+                elif (var == "boson_0_truth_p4"):
+                    target_p4 = vector.zip({'x':data[var]['fP']['fX'], 
+                                    'y':data[var]['fP']['fY'], 
+                                    'z':data[var]['fP']['fZ'],
+                                    't':data[var]['fE']})
+                    
+                    arr_truth.append(target_p4.rho) # pt
+                    arr_truth.append(target_p4.eta) # eta
+                    arr_truth.append(target_p4.phi) # phi
+                    arr_truth.append(target_p4.tau) # mass
                 else:
-                    tensors_var.append(tf.constant(ak.to_numpy(data[var]), dtype=tf.float32))
-
+                    arr.append(data[var])
+            
+            arrays.append(arr)
+            arrays_truth.append(arr_truth)
 
             if plot_variables:
                     # Convert components to numpy arrays
@@ -98,31 +118,57 @@ class DatasetConstructor():
                         print(f"Skipping plot for {var} - {name} due to non-numeric or empty data.")
             else:
                 print("Plot variables is turned off")
-                        
+                            
+            for j, (arr_file, arr_truth_file) in enumerate(zip(arrays, arrays_truth)):
+                n_evt = 0
+                tensors_var = []
+                truths_var = []
+
+                # Iterácia cez jednotlivé premenné a truth vektory
+                for arr_var in arr_file:
+                    # Konverzia premenných na tensorflow tenzory
+                    tensor = tf.constant(ak.to_numpy(arr_var), dtype=tf.float32)
+                    tensors_var.append(tensor)
                 
-            # Stack tensors for each file
-            tensor_stack = tf.stack(tensors_var, axis=1)
+                for truth_var in arr_truth_file:
+                    # Konverzia truth na tensorflow tensor
+                    truth_tensor = tf.constant(ak.to_numpy(truth_var), dtype=tf.float32)
+                    truths_var.append(truth_tensor)
+
+                # Stack premenných
+                tensor_stack = tf.stack(tensors_var, axis=1)  # Premenné (napr. 35 stĺpcov)
+                truth_stack = tf.stack(truths_var, axis=1)    # Pravdivostné vektory (napr. 4 stĺpce)
+
+            # Pridanie do zoznamov
             tensors.append(tensor_stack)
+            truth_vectors.append(truth_stack)
+
             n_evt += tensor_stack.shape[0]
 
-            #print(f"File {file} processed with tensor shape: {tensor_stack.shape}")
+            # Výstup pre kontrolu
+            print(j,tensor_stack.shape, truth_stack.shape)
+
             n_events.append(n_evt)
-        
+ 
         #print("Total tensors processed:", tensors)
         print("Total events", np.sum(n_events))
         #print(f"Length of tensor lists {len(tensors)}")
+        
         datasets = []
-        for tensors_sample in tensors:
-                # Create a dataset from each individual tensor file
-                #print(type(tensors_sample))
-                #print(len(tensors_sample))
-                dataset = tf.data.Dataset.from_tensor_slices((tensors_sample))
-                datasets.append(dataset)
+        for tensor_file, truth_file in zip(tensors,truth_vectors):
+                dataset_sample = tf.data.Dataset.from_tensor_slices((tensor_file,truth_file))
+                datasets.append(dataset_sample)
+        print("Datasets_len",len(datasets))
+        
         weights_list = []
-        weights_list = [tensor.shape[0] / total_events for tensor, total_events in zip(tensors, n_events)]
-        #print(weights_list)
+        for tensor, total_events in zip(tensors, n_events):
+            weights = [tensor.shape[0] / total_events]
+            weights_list.extend(weights)
+        print("weights_list_len",len(weights_list))
+        
         dataset = tf.data.Dataset.sample_from_datasets(datasets, weights=weights_list)
         print("Dataset Successfully imported")
+        
         return dataset, n_events
         
 if __name__ == "__main__":
