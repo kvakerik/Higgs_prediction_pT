@@ -30,10 +30,12 @@ variables_higgs = [
 ]
 
 class DatasetConstructor():
-    def __init__(self): 
+    def __init__(self,batch_size=64,train_fraction=0.8): 
         self.variables_higgs = variables_higgs 
         self.path_sig = path_sig
         self.path_bkg = path_bkg
+        self.batch_size = batch_size
+        self.train_fraction = train_fraction
 
     def importFiles(self):
         files_sig = glob.glob(self.path_sig)
@@ -48,7 +50,7 @@ class DatasetConstructor():
         files_sig, files_bkg = self.importFiles()
         all_files = files_sig + files_bkg  # Combine signal and background
 
-        print(len(all_files))
+        print("All files ",len(all_files))
         
         arrays = []
         arrays_truth = []
@@ -155,11 +157,36 @@ class DatasetConstructor():
         #print(f"Length of tensor lists {len(tensors)}")
         
         datasets = []
+
         for tensor_file, truth_file in zip(tensors,truth_vectors):
                 dataset_sample = tf.data.Dataset.from_tensor_slices((tensor_file,truth_file))
                 datasets.append(dataset_sample)
         print("Datasets_len",len(datasets))
+        print(datasets)
         
+        train_datasets=[]
+        val_datasets=[]
+        
+        for dataset, dataset_size in zip(datasets,n_events):
+            
+            # Determine datasets split sizes
+            train_size = int(self.train_fraction * dataset_size)
+
+            # Split datasets to train and validation data
+            train_dataset = datasets.take(train_size)
+            val_dataset = datasets.skip(train_size)
+
+            train_dataset = train_dataset.batch(self.batch_size)
+            val_dataset = val_dataset.batch(self.batch_size)
+
+            train_datasets.append(train_dataset)
+            val_datasets.append(val_dataset)
+            
+            print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {dataset_size - train_size}")
+
+        print("train",len(train_datasets))
+        print("val",len(val_datasets))
+    
         weights_list = []
         for tensor, total_events in zip(tensors, n_events):
             weights = [tensor.shape[0] / total_events]
