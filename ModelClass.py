@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 import matplotlib.pyplot as plt
 from DatasetClass import DatasetConstructor
 
@@ -16,7 +17,7 @@ class ModelConstructor:
         self.model = None
         self.normalizer = None
 
-    def prepare_dataset(self,train_fraction=0.8):
+    def prepare_dataset(self, use_saved_data = True):
         """
         Prepare datasets for training and validation.
         Args:
@@ -28,20 +29,18 @@ class ModelConstructor:
         #TODO import data from datasetConstructor and work with target and train data 
         # Use DatasetConstructor to build the dataset
         dataset_constructor = DatasetConstructor()
-        dataset, n_events = dataset_constructor.buildDataset(plot_variables=False)
+        if use_saved_data:
 
-        # Determine dataset split sizes
-        dataset_size = sum(n_events)
-        train_size = int(train_fraction * dataset_size)
-
-        train_dataset = dataset.take(train_size)
-        val_dataset = dataset.skip(train_size)
+            val_dataset = tf.data.Dataset.load("data/val_dataset")
+            train_dataset =tf.data.Dataset.load("data/train_dataset")
+            val_events, train_events = np.loadtxt("data/event_counts.txt")
+        else:
+            val_dataset, train_dataset, val_events, train_events = dataset_constructor.buildDataset(plot_variables=False, save_dataset=False)
 
         train_dataset = train_dataset.batch(self.batch_size)
         val_dataset = val_dataset.batch(self.batch_size)
 
-        print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {dataset_size - train_size}")
-        return train_dataset, val_dataset
+        return train_dataset, val_dataset, val_events, train_events 
 
     @staticmethod
     @tf.function
