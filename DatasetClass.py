@@ -45,7 +45,7 @@ class DatasetConstructor():
         #print(f"imported background files: {files_bkg}")
         return files_sig, files_bkg
 
-    def buildDataset(self, plot_variables : bool = False):
+    def buildDataset(self, plot_variables : bool = False, save_dataset = False):
         # Import files
         files_sig, files_bkg = self.importFiles()
         all_files = files_sig + files_bkg  # Combine signal and background
@@ -166,44 +166,71 @@ class DatasetConstructor():
         
         train_datasets=[]
         val_datasets=[]
-        
+        train_size_dataset=[]
+        val_size_dataset=[]
+
         for dataset, dataset_size in zip(datasets,n_events):
             
             # Determine datasets split sizes
             train_size = int(self.train_fraction * dataset_size)
+            val_size = int((1-self.train_fraction) * dataset_size)
+            
+            if val_size and train_size >=1:
+                # Split datasets to train and validation data
+                train_dataset = dataset.take(train_size)
+                val_dataset = dataset.skip(train_size)
 
-            # Split datasets to train and validation data
-            train_dataset = datasets.take(train_size)
-            val_dataset = datasets.skip(train_size)
+                train_datasets.append(train_dataset)
+                val_datasets.append(val_dataset)
 
-            train_dataset = train_dataset.batch(self.batch_size)
-            val_dataset = val_dataset.batch(self.batch_size)
+                train_size_dataset.append(train_size)
+                val_size_dataset.append(val_size)
 
-            train_datasets.append(train_dataset)
-            val_datasets.append(val_dataset)
             
             print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {dataset_size - train_size}")
 
         print("train",len(train_datasets))
         print("val",len(val_datasets))
-    
-        weights_list = []
-        for tensor, total_events in zip(tensors, n_events):
-            weights = [tensor.shape[0] / total_events]
-            weights_list.extend(weights)
-        print("weights_list_len",len(weights_list))
+
+        weights_list_train = []
+        weights_list_val = []
+
+        for train_dataset,val_dataset,train_size,val_size in zip(train_datasets,val_datasets,train_size_dataset,val_size_dataset):
+            try:
+                print("len(train_dataset)",len(train_dataset))
+                weights_train = [len(train_dataset) / train_size]
+                weights_list_train.extend(weights_train)
+                
+                
+                print("len(val_dataset)",len(val_dataset))
+                weights_val = [len(val_dataset) / val_size]
+                weights_list_val.extend(weights_val)
+            except ZeroDivisionError:
+                print("Skipping one event file")
         
-        dataset = tf.data.Dataset.sample_from_datasets(datasets, weights=weights_list)
+        print("Finished weighting")
+        
+        print("weights_list_train_len",len(weights_list_train))
+        print("weights_list_var_len",len(weights_list_val))
+
+
+        val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val)
+        train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train)
+        
         print("Dataset Successfully imported")
-        print(type(dataset))
-        for x in dataset.take(1):
+        print(type(val_dataset))
+        for x in val_dataset.take(1):
             print(x)    
+
+        if save_dataset:
+            val_dataset.save("data/val_dataset")
+            train_dataset.save("data/train_dataset")
         
-        return dataset, n_events
+        return val_dataset, train_dataset
         
 if __name__ == "__main__":
     datasetConstructor = DatasetConstructor()
-    dataset, n_events = datasetConstructor.buildDataset(plot_variables=False)
+    dataset, n_events = datasetConstructor.buildDataset(plot_variables=False,save_dataset=True)
 
     
    
