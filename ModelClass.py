@@ -1,5 +1,7 @@
 import tensorflow as tf
+import numpy as np
 import matplotlib.pyplot as plt
+from DatasetClass import DatasetConstructor
 
 class ModelConstructor:
     def __init__(self, input_shape, variables, model_type = "mlp", activation_function = "sigmoid", batch_size=64, hidden_layer_size=100, n_layers=4, initial_learning_rate=0.001, n_epochs=10):
@@ -15,7 +17,7 @@ class ModelConstructor:
         self.model = None
         self.normalizer = None
 
-    def prepare_dataset(self, dataframe, label_col, train_fraction=0.8):
+    def prepare_dataset(self, use_saved_data = True):
         """
         Prepare datasets for training and validation.
         Args:
@@ -25,18 +27,20 @@ class ModelConstructor:
         """
 
         #TODO import data from datasetConstructor and work with target and train data 
-        dataset = tf.data.Dataset.from_tensor_slices((dataframe[self.variables].to_numpy(), dataframe[label_col].to_numpy()))
-        dataset_size = len(dataframe)
-        train_size = int(train_fraction * dataset_size)
+        # Use DatasetConstructor to build the dataset
+        dataset_constructor = DatasetConstructor()
+        if use_saved_data:
 
-        train_dataset = dataset.take(train_size)
-        val_dataset = dataset.skip(train_size)
+            val_dataset = tf.data.Dataset.load("data/val_dataset")
+            train_dataset =tf.data.Dataset.load("data/train_dataset")
+            val_events, train_events = np.loadtxt("data/event_counts.txt")
+        else:
+            val_dataset, train_dataset, val_events, train_events = dataset_constructor.buildDataset(plot_variables=False, save_dataset=False)
 
         train_dataset = train_dataset.batch(self.batch_size)
         val_dataset = val_dataset.batch(self.batch_size)
 
-        print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {dataset_size - train_size}")
-        return train_dataset, val_dataset
+        return train_dataset, val_dataset, val_events, train_events 
 
     @staticmethod
     @tf.function
@@ -147,3 +151,7 @@ class ModelConstructor:
         plt.legend()
         plt.title("Output Distribution")
         plt.show()
+
+if __name__ == "__main__":
+    modelConstructor = ModelConstructor()
+    train_dataset, val_dataset = modelConstructor.prepare_dataset()
