@@ -2,22 +2,29 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from DatasetClass import Dataset
+from tensorflow.keras.layers import Normalization, Input, Dense
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers.schedules import CosineDecay
+from tensorflow.keras.models import Model
+from tensorflow.keras.losses import MeanSquaredError
 
-class Model:
+
+
+class RegressionModel:
     def __init__(self, dataset, **kwargs):
         self.dataset = dataset
         self.variables = dataset.variables_higgs
         self.targets = dataset.target_variable
-        self.n_train = None
+        self.n_train = dataset.train_events
         self.normalizer = None
         self.history = None
         self.model = None
         """
         Model hyperparameters.
         """
-        self.input_shape = kwargs.get('input_shape', 4)
+        self.input_shape = kwargs.get('input_shape', 35)
         self.model_type = kwargs.get('model_type', "mlp")
-        self.activation_function = kwargs.get('activation_function', "sigmoid")
+        self.activation_function = kwargs.get('activation_function', "relu")
         self.batch_size = kwargs.get('batch_size', 64)
         self.hidden_layer_size = kwargs.get('hidden_layer_size', 100)
         self.n_layers = kwargs.get('n_layers', 4)
@@ -44,8 +51,8 @@ class Model:
         Args:
             train_dataset: Training dataset.
         """
-        self.normalizer = tf.keras.layers.Normalization()
-        self.normalizer.adapt(self.train_dataset.map(self.pick_only_data))
+        self.normalizer = Normalization()
+        self.normalizer.adapt(self.dataset.train_dataset.map(self.pick_only_data))
 
     def build_model(self):
         """
@@ -53,29 +60,29 @@ class Model:
         Args:
             n_train: Number of training samples (used for learning rate decay).
         """
-        input_layer = tf.keras.layers.Input(shape=(len(self.variables),))
+        input_layer = Input(shape=(self.input_shape,))
         layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
-            layer = tf.keras.layers.Dense(
+            layer = Dense(
                 self.hidden_layer_size // self.n_layers,
-                activation="relu"
+                activation=self.activation_function
             )(layer)
 
-        output_layer = tf.keras.layers.Dense(1, activation=self.activation_function)(layer)
+        output_layer = Dense(1, activation=self.activation_function)(layer)
 
         # Define learning rate decay schedule
-        learning_rate = tf.keras.optimizers.schedules.CosineDecay(
+        learning_rate = CosineDecay(
             initial_learning_rate = self.initial_learning_rate,
             decay_steps = self.n_epochs * self.n_train // self.batch_size,
             alpha = self.initial_learning_rate
         )
 
         # Compile the model
-        self.model = tf.keras.Model(inputs=input_layer, outputs=output_layer)
+        self.model = Model(inputs=input_layer, outputs=output_layer)
         self.model.compile(
-            optimizer=tf.optimizers.Adam(learning_rate=learning_rate),
-            loss=tf.losses.mean_squared_error(),
+            optimizer=Adam(learning_rate=learning_rate),
+            loss=MeanSquaredError(),
         )
 
     def train_model(self, train_dataset, val_dataset, epochs=None):
@@ -138,8 +145,12 @@ if __name__ == "__main__":
     dataset.load_data()
     print((dataset.train_dataset))
 
-    model = Model(input_shape=35, dataset=dataset)
+    model = RegressionModel(input_shape=35, dataset=dataset)
     model.prepare_dataset()
+    model.create_normalizer()
+    model.build_model()
+    model.train_model(model.train_batch, model.val_batch)
+    model.plot_history(model.history)
 
 
     
