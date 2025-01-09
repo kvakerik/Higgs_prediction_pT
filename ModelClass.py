@@ -1,62 +1,53 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from DatasetClass import DatasetConstructor
+from DatasetClass import Dataset
 
-class ModelConstructor:
-    def __init__(self, input_shape, variables, model_type = "mlp", activation_function = "sigmoid", batch_size=64, hidden_layer_size=100, n_layers=4, initial_learning_rate=0.001, n_epochs=10):
-        self.input_shape = input_shape
-        self.variables = variables
-        self.model_type = model_type
-        self.activation_function = activation_function
-        self.batch_size = batch_size
-        self.hidden_layer_size = hidden_layer_size
-        self.n_layers = n_layers
-        self.initial_learning_rate = initial_learning_rate
-        self.n_epochs = n_epochs
-        self.model = None
+class Model:
+    def __init__(self, dataset, **kwargs):
+        self.dataset = dataset
+        self.variables = dataset.variables_higgs
+        self.targets = dataset.target_variable
+        self.n_train = None
         self.normalizer = None
-
-    def prepare_dataset(self, use_saved_data = True):
+        self.history = None
+        self.model = None
         """
-        Prepare datasets for training and validation.
-        Args:
-            dataframe: Input pandas DataFrame.
-            label_col: Name of the label column.
-            train_fraction: Fraction of the dataset used for training.
+        Model hyperparameters.
         """
+        self.input_shape = kwargs.get('input_shape', 4)
+        self.model_type = kwargs.get('model_type', "mlp")
+        self.activation_function = kwargs.get('activation_function', "sigmoid")
+        self.batch_size = kwargs.get('batch_size', 64)
+        self.hidden_layer_size = kwargs.get('hidden_layer_size', 100)
+        self.n_layers = kwargs.get('n_layers', 4)
+        self.initial_learning_rate = kwargs.get('initial_learning_rate', 0.001)
+        self.n_epochs = kwargs.get('n_epochs', 10)
 
-        #TODO import data from datasetConstructor and work with target and train data 
-        # Use DatasetConstructor to build the dataset
-        dataset_constructor = DatasetConstructor()
-        if use_saved_data:
-
-            val_dataset = tf.data.Dataset.load("data/val_dataset")
-            train_dataset =tf.data.Dataset.load("data/train_dataset")
-            val_events, train_events = np.loadtxt("data/event_counts.txt")
-        else:
-            val_dataset, train_dataset, val_events, train_events = dataset_constructor.buildDataset(plot_variables=False, save_dataset=False)
-
-        train_dataset = train_dataset.batch(self.batch_size)
-        val_dataset = val_dataset.batch(self.batch_size)
-
-        return train_dataset, val_dataset, val_events, train_events 
+    def prepare_dataset(self):
+        """
+        Prepare the dataset for training and validation. 
+        """
+        self.dataset.load_data()
+        print("dlzka val_datasetu",len(self.dataset.val_dataset))
+        self.train_batch = self.dataset.train_dataset.batch(self.batch_size)
+        self.val_batch = self.dataset.val_dataset.batch(self.batch_size)
 
     @staticmethod
     @tf.function
     def pick_only_data(data, label):
         return data
 
-    def create_normalizer(self, train_dataset):
+    def create_normalizer(self):
         """
         Create and adapt the normalization layer.
         Args:
             train_dataset: Training dataset.
         """
         self.normalizer = tf.keras.layers.Normalization()
-        self.normalizer.adapt(train_dataset.map(self.pick_only_data))
+        self.normalizer.adapt(self.train_dataset.map(self.pick_only_data))
 
-    def build_model(self, n_train):
+    def build_model(self):
         """
         Build a deep neural network model with learning rate decay.
         Args:
@@ -75,17 +66,16 @@ class ModelConstructor:
 
         # Define learning rate decay schedule
         learning_rate = tf.keras.optimizers.schedules.CosineDecay(
-            initial_learning_rate=self.initial_learning_rate,
-            decay_steps=self.n_epochs * n_train // self.batch_size,
-            alpha=self.initial_learning_rate
+            initial_learning_rate = self.initial_learning_rate,
+            decay_steps = self.n_epochs * self.n_train // self.batch_size,
+            alpha = self.initial_learning_rate
         )
 
         # Compile the model
         self.model = tf.keras.Model(inputs=input_layer, outputs=output_layer)
         self.model.compile(
             optimizer=tf.optimizers.Adam(learning_rate=learning_rate),
-            loss=tf.losses.BinaryCrossentropy(),
-            metrics=[tf.metrics.BinaryAccuracy(), tf.metrics.Recall(), tf.metrics.Precision()]
+            loss=tf.losses.mean_squared_error(),
         )
 
     def train_model(self, train_dataset, val_dataset, epochs=None):
@@ -100,7 +90,7 @@ class ModelConstructor:
             raise ValueError("Model has not been built yet. Call build_model() first.")
         epochs = epochs or self.n_epochs
         history = self.model.fit(train_dataset, epochs=epochs, validation_data=val_dataset)
-        return history
+        self.history = history
 
     def evaluate_model(self, dataset):
         """
@@ -124,15 +114,6 @@ class ModelConstructor:
         plt.legend()
         plt.title("Training and Validation Loss")
 
-        plt.figure("Training Accuracy")
-        plt.plot(history.history['binary_accuracy'], label='Train Accuracy')
-        plt.plot(history.history['val_binary_accuracy'], label='Validation Accuracy')
-        plt.xlabel('Epochs')
-        plt.ylabel('Accuracy')
-        plt.legend()
-        plt.title("Training and Validation Accuracy")
-        plt.show()
-
     def plot_output_distributions(self, val_dataset, train_dataset):
         """
         Plot model output distributions for validation and training datasets.
@@ -140,8 +121,8 @@ class ModelConstructor:
             val_dataset: Validation dataset.
             train_dataset: Training dataset.
         """
-        y_val = self.model.predict(val_dataset.map(self.pick_only_data).unbatch().batch(1024))
-        y_train = self.model.predict(train_dataset.map(self.pick_only_data).unbatch().batch(1024))
+        y_val = self.model.predict(val_dataset.map(self.pick_only_data))
+        y_train = self.model.predict(train_dataset.map(self.pick_only_data))
 
         plt.figure("Model Output Distribution")
         plt.hist(y_val, bins=100, range=(0, 1), histtype='step', label='Validation Output', density=True)
@@ -153,5 +134,13 @@ class ModelConstructor:
         plt.show()
 
 if __name__ == "__main__":
-    modelConstructor = ModelConstructor()
-    train_dataset, val_dataset = modelConstructor.prepare_dataset()
+    dataset = Dataset()
+    dataset.load_data()
+    print((dataset.train_dataset))
+
+    model = Model(input_shape=35, dataset=dataset)
+    model.prepare_dataset()
+
+
+    
+    

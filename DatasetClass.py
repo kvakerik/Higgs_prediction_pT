@@ -16,23 +16,25 @@ gpus = tf.config.list_physical_devices('GPU')
 
 #path_sig = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*VBFH*.root"
 #path_bkg = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*Ztt*.root"
-
-variables_higgs = [  
-    "tau_0_p4",
-    "tau_1_p4",
-    "ditau_deta","ditau_dphi","ditau_dr","ditau_higgspt","ditau_scal_sum_pt",
-    "jet_0_p4",
-    "jet_1_p4",
-    "dijet_p4",
-    "met_p4", 
-    "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus", 
-]
-
 class Dataset():
-    def __init__(self, variables_higgs = variables_higgs, target_variable = "truth_boson_p4",  **kwargs): 
-        self.variables_higgs = variables_higgs 
-        self.variables_higgs.append(target_variable)
-        self.taget_variable = target_variable
+    def __init__(self, **kwargs): 
+        default_variables_higgs = [  
+                    "tau_0_p4",
+                    "tau_1_p4",
+                    "ditau_deta","ditau_dphi","ditau_dr","ditau_higgspt","ditau_scal_sum_pt",
+                    "jet_0_p4",
+                    "jet_1_p4",
+                    "dijet_p4",
+                    "met_p4", 
+                    "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus", 
+                    ]
+        default_target_variable = "truth_boson_p4"
+        
+        self.variables_higgs = kwargs.get('variables_higgs', default_variables_higgs)
+        self.target_variable = kwargs.get('target_variable', default_target_variable)
+        if self.target_variable not in self.variables_higgs:
+            self.variables_higgs.append(self.target_variable)
+
         self.train_fraction = kwargs.get('train_fraction', 0.8)
         self.file_name = kwargs.get('file_name', "data")
         self.file_paths = kwargs.get('file_paths', "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*.root")
@@ -61,7 +63,7 @@ class Dataset():
         num_processed = 0
         num_skipped = 0        
         # Process each file individually
-        for file in all_files[0:10]:
+        for file in all_files[:15]:
             # print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
             data = f.arrays(self.variables_higgs, library="ak")
@@ -71,7 +73,7 @@ class Dataset():
                 num_processed += 1
                 for var in self.variables_higgs: 
                     #print(var)
-                    if ('p4' in var) and (var != self.taget_variable):
+                    if ('p4' in var) and (var != self.target_variable):
                         # Extract the 4-vector pt, eta, phi, mass
                         p4 = vector.zip({
                             'x': data[var]['fP']['fX'], 
@@ -85,7 +87,7 @@ class Dataset():
                         arr.append(p4.phi)  # phi
                         arr.append(p4.tau)  # mass
 
-                    elif (var == self.taget_variable):
+                    elif (var == self.target_variable):
                         target_p4 = vector.zip({
                             'x': data[var]['fP']['fX'], 
                             'y': data[var]['fP']['fY'], 
@@ -132,22 +134,19 @@ class Dataset():
                 print(f"Processed file {file}: {tensor_stack.shape}, {truth_stack.shape}")
             else:
                 num_skipped += 1
-                #print(f"Skipping file {file} due to empty data")
+                print(f"Skipping file {file} due to empty data")
         
         print(num_processed, "files processed")
         print(num_skipped, "files skipped")
         # Total events
         total_events = np.sum(n_events)
         print("Total events", total_events)
-        #print(f"Length of tensor lists {len(tensors)}")
         
         datasets = []
 
         for tensor_file, truth_file in zip(tensors, truth_vectors):
             dataset_sample = tf.data.Dataset.from_tensor_slices((tensor_file, truth_file))
             datasets.append(dataset_sample)
-        #print("Datasets_len", len(datasets))
-        #print(datasets)
         
         train_datasets = []
         val_datasets = []
@@ -174,22 +173,22 @@ class Dataset():
 
             print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {val_size}")
 
-        #print("Number of training datasets:", len(train_datasets))
-        #print("Number of validation datasets:", len(val_datasets))
-
         weights_list_train = [size / sum(train_size_dataset) for size in train_size_dataset]
         weights_list_val = [size / sum(val_size_dataset) for size in val_size_dataset]
-        #print("number of weights train: ", len( weights_list_train))
-        #print("number of weights val: ", len( weights_list_val))
-        #print("suma váh: ", sum(weights_list_train))
         print("Dataset Successfully weighted")
-        #print(type(val_dataset))
-        #print("train events")
         train_events = int(self.train_fraction * total_events)
-        val_events = int((1 - self.train_fraction) * total_events)
+        val_events = int(total_events - train_events)
 
-        self.val_dataset = val_dataset
-        self.train_dataset = train_dataset
+        if len(val_datasets) > 0:
+            self.val_dataset = val_datasets[0]
+            for ds in val_datasets[1:]:
+                self.val_dataset = self.val_dataset.concatenate(ds)
+
+        if len(train_datasets) > 0:
+            self.train_dataset = train_datasets[0]
+            for ds in train_datasets[1:]:
+                self.train_dataset = self.train_dataset.concatenate(ds)
+
         self.val_events = val_events
         self.train_events = train_events
     
@@ -201,7 +200,6 @@ class Dataset():
         val_dataset.save(f"{self.file_name}/val_dataset")
         train_dataset.save(f"{self.file_name}/train_dataset")
 
-        # Save train_events and val_events to a text file
         output_file = f"{self.file_name}/event_counts.txt"
         with open(output_file, "w") as f:
             f.write(f"{self.train_events}\n")
@@ -213,17 +211,16 @@ class Dataset():
         self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
             self.train_events, self.val_events = map(int, f.readlines())
+    
 
-
- 
 
 if __name__ == "__main__":
-   # dataset= Dataset()
-    #dataset.build_dataset()
-    #dataset.save_data()
     dataset_2 = Dataset()
+    dataset_2.build_dataset()
+    dataset_2.save_data()
     dataset_2.load_data()
-    print("pocet eventov: ",dataset_2.train_events)
+    print("pocet eventov: ",dataset_2.val_events)
+    print("dlzka ", len(dataset_2.val_dataset))
     
 
 
