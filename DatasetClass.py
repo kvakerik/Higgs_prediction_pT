@@ -28,6 +28,7 @@ class Dataset():
                     "met_p4", 
                     "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus", 
                     ]
+        
         default_target_variable = "truth_boson_p4"
         
         self.variables_higgs = kwargs.get('variables_higgs', default_variables_higgs)
@@ -42,6 +43,9 @@ class Dataset():
         self.train_dataset = None
         self.val_events = None
         self.train_events = None
+
+    def __call__(self):
+        self.load_data()
 
     def importFiles(self): 
         print("Importing Root files")
@@ -64,7 +68,7 @@ class Dataset():
         num_skipped = 0        
         # Process each file individually
         for file in all_files[:15]:
-            # print("Reading file", file)
+            print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
             data = f.arrays(self.variables_higgs, library="ak")
             arr = []
@@ -211,7 +215,6 @@ class Dataset():
         self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
             self.train_events, self.val_events = map(int, f.readlines())
-    
 
 
 if __name__ == "__main__":
