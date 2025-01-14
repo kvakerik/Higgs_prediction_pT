@@ -1,11 +1,12 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from DatasetClass import Dataset
 from tensorflow.keras.layers import Normalization, Input, Dense
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.optimizers.schedules import CosineDecay
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.losses import MeanSquaredError
 
 class RegressionModel:
@@ -25,6 +26,31 @@ class RegressionModel:
         self.n_layers = kwargs.get('n_layers', 4)
         self.initial_learning_rate = kwargs.get('initial_learning_rate', 0.001)
         self.n_epochs = kwargs.get('n_epochs', 10)
+    
+    def save(self):
+        if self.model is None:
+            raise ValueError("Model has not been built yet. Call build_model() first.") 
+        
+        current_dir = os.getcwd()
+        models_dir = os.path.join(current_dir, "models")
+
+        if not os.path.exists(models_dir):
+            os.makedirs(models_dir)
+
+        model_save_path = os.path.join(models_dir, "mlp_regression_model")
+        self.model.save(model_save_path)
+        print(f"Model saved to {model_save_path}")
+
+    def load(self):
+        current_dir = os.getcwd()
+        models_dir = os.path.join(current_dir, "models")
+        model_load_path = os.path.join(models_dir, "mlp_regression_model")
+
+        if os.path.exists(model_load_path):
+            self.model = load_model(model_load_path)
+            print(f"Model loaded from {model_load_path}")
+        else:
+            raise FileNotFoundError(f"Model not found at {model_load_path}")
         
     def prepare_dataset(self):
         """
@@ -131,7 +157,7 @@ class RegressionModel:
             train_dataset: Training dataset.
         """
         y_val = self.model.predict(self.dataset.val_dataset.map(self.pick_only_data))
-        y_train = self.model.predict(self.datest.train_dataset.map(self.pick_only_data))
+        y_train = self.model.predict(self.dataset.train_dataset.map(self.pick_only_data))
 
         plt.figure("Model Output Distribution")
         plt.hist(y_val, bins=100, range=(0, 1), histtype='step', label='Validation Output', density=True)
@@ -141,17 +167,6 @@ class RegressionModel:
         plt.legend()
         plt.title("Output Distribution")
         plt.show()
-
-if __name__ == "__main__":
-    dataset = Dataset()
-    dataset.load_data()
-    model = RegressionModel(dataset=dataset)
-    model.prepare_dataset()
-    model.create_normalizer()
-    model.build_model()
-    model.train_model(model.train_batch, model.val_batch)
-    model.evaluate()
-
 
 
 

@@ -217,13 +217,4 @@ class Dataset():
             self.train_events, self.val_events = map(int, f.readlines())
 
 
-if __name__ == "__main__":
-    dataset_2 = Dataset()
-    dataset_2.build_dataset()
-    dataset_2.save_data()
-    dataset_2.load_data()
-    print("pocet eventov: ",dataset_2.val_events)
-    print("dlzka ", len(dataset_2.val_dataset))
-    
-
 
