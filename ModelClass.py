@@ -8,21 +8,16 @@ from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model
 from tensorflow.keras.losses import MeanSquaredError
 
-
-
 class RegressionModel:
     def __init__(self, dataset, **kwargs):
         self.dataset = dataset
-        self.variables = dataset.variables_higgs
-        self.targets = dataset.target_variable
-        self.n_train = dataset.train_events
         self.normalizer = None
         self.history = None
         self.model = None
+        self.history = None
         """
         Model hyperparameters.
         """
-        self.input_shape = kwargs.get('input_shape', 35)
         self.model_type = kwargs.get('model_type', "mlp")
         self.activation_function = kwargs.get('activation_function', "relu")
         self.batch_size = kwargs.get('batch_size', 64)
@@ -30,13 +25,11 @@ class RegressionModel:
         self.n_layers = kwargs.get('n_layers', 4)
         self.initial_learning_rate = kwargs.get('initial_learning_rate', 0.001)
         self.n_epochs = kwargs.get('n_epochs', 10)
-
+        
     def prepare_dataset(self):
         """
         Prepare the dataset for training and validation. 
         """
-        self.dataset.load_data()
-        print("dlzka val_datasetu",len(self.dataset.val_dataset))
         self.train_batch = self.dataset.train_dataset.batch(self.batch_size)
         self.val_batch = self.dataset.val_dataset.batch(self.batch_size)
 
@@ -60,7 +53,7 @@ class RegressionModel:
         Args:
             n_train: Number of training samples (used for learning rate decay).
         """
-        input_layer = Input(shape=(self.input_shape,))
+        input_layer = Input(shape=tuple(self.dataset.train_dataset.element_spec[0].shape.as_list()))
         layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
@@ -69,12 +62,12 @@ class RegressionModel:
                 activation=self.activation_function
             )(layer)
 
-        output_layer = Dense(1, activation=self.activation_function)(layer)
+        output_layer = Dense(1, activation=None)(layer)
 
         # Define learning rate decay schedule
         learning_rate = CosineDecay(
             initial_learning_rate = self.initial_learning_rate,
-            decay_steps = self.n_epochs * self.n_train // self.batch_size,
+            decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
             alpha = self.initial_learning_rate
         )
 
@@ -83,6 +76,7 @@ class RegressionModel:
         self.model.compile(
             optimizer=Adam(learning_rate=learning_rate),
             loss=MeanSquaredError(),
+            metrics=[MeanSquaredError()]
         )
 
     def train_model(self, train_dataset, val_dataset, epochs=None):
@@ -99,37 +93,45 @@ class RegressionModel:
         history = self.model.fit(train_dataset, epochs=epochs, validation_data=val_dataset)
         self.history = history
 
-    def evaluate_model(self, dataset):
+    def evaluate(self):
         """
-        Evaluate the model.
-        Args:
-            dataset: Dataset to evaluate on.
+        Evaluate the model on the validation dataset.
+        Automatically prepares the dataset if not already prepared.
         """
-        return self.model.evaluate(dataset)
+        if not self.model:
+            raise ValueError("Model has not been built yet. Call build_model() first.")
+        
+        # Ensure datasets are prepared
+        if not hasattr(self, 'val_batch'):
+            self.dataset.build_dataset()
+        
+        # Evaluate the model
+        evaluation_results = self.model.evaluate(self.val_batch)
+        print(f"Validation Loss: {evaluation_results}")
 
-    def plot_history(self, history):
+    def plot_history(self):
         """
         Plot training history.
         Args:
             history: Training history object from model.fit().
         """
         plt.figure("Training Loss")
-        plt.plot(history.history['loss'], label='Train Loss')
-        plt.plot(history.history['val_loss'], label='Validation Loss')
+        plt.plot(self.history.history['loss'], label='Train Loss')
+        plt.plot(self.history.history['val_loss'], label='Validation Loss')
         plt.xlabel('Epochs')
         plt.ylabel('Loss')
         plt.legend()
         plt.title("Training and Validation Loss")
 
-    def plot_output_distributions(self, val_dataset, train_dataset):
+    def plot_output_distributions(self):
         """
         Plot model output distributions for validation and training datasets.
         Args:
             val_dataset: Validation dataset.
             train_dataset: Training dataset.
         """
-        y_val = self.model.predict(val_dataset.map(self.pick_only_data))
-        y_train = self.model.predict(train_dataset.map(self.pick_only_data))
+        y_val = self.model.predict(self.dataset.val_dataset.map(self.pick_only_data))
+        y_train = self.model.predict(self.datest.train_dataset.map(self.pick_only_data))
 
         plt.figure("Model Output Distribution")
         plt.hist(y_val, bins=100, range=(0, 1), histtype='step', label='Validation Output', density=True)
@@ -143,14 +145,15 @@ class RegressionModel:
 if __name__ == "__main__":
     dataset = Dataset()
     dataset.load_data()
-    print((dataset.train_dataset))
-
-    model = RegressionModel(input_shape=35, dataset=dataset)
+    model = RegressionModel(dataset=dataset)
     model.prepare_dataset()
     model.create_normalizer()
     model.build_model()
     model.train_model(model.train_batch, model.val_batch)
-    model.plot_history(model.history)
+    model.evaluate()
+
+
+
 
 
     
