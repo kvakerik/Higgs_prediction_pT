@@ -6,6 +6,7 @@ import vector
 import awkward as ak
 import matplotlib.pyplot as plt 
 import numpy as np
+from src.helpers import pick_only_data, extract_data
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
@@ -67,7 +68,7 @@ class Dataset():
         num_processed = 0
         num_skipped = 0        
         # Process each file individually
-        for file in all_files[:15]:
+        for file in all_files:
             print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
             data = f.arrays(self.variables_higgs, library="ak")
@@ -216,5 +217,35 @@ class Dataset():
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
             self.train_events, self.val_events = map(int, f.readlines())
 
+    def plot_distribution(self):
+        # Extract data from the TensorFlow datasets
+        y_val = extract_data(self.val_dataset.map(pick_only_data))
+        y_train = extract_data(self.train_dataset.map(pick_only_data))
+
+        plt.figure(figsize=(10, 6))
+        plt.hist(y_val, bins=100, range=(0, 1), histtype='step', label='Validation Output', density=True)
+        plt.hist(y_train, bins=100, range=(0, 1), histtype='step', label='Training Output', density=True)
+        plt.xlabel("Input Data")
+        plt.ylabel("Density")
+        plt.legend()
+        plt.title("Input Distribution")
+        plt.show()
+
+if __name__ == "__main__":
+    dataset = Dataset()
+    dataset.load_data()
+    print(len(dataset.train_dataset))
+    print(type(dataset.train_dataset))
+    data = []
+    for features, labels in dataset.train_dataset.take(100000):
+        data.append(labels.numpy()[0])
+
+    plt.hist(data, bins=100, range=(0, 500), histtype='step', label='Training input', density=True)
+    plt.show()
+
+    
+
+   
+    
 
 

@@ -8,6 +8,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.losses import MeanSquaredError
+from src.helpers import pick_only_data
 
 class RegressionModel:
     def __init__(self, dataset, **kwargs):
@@ -56,13 +57,9 @@ class RegressionModel:
         """
         Prepare the dataset for training and validation. 
         """
+        print("Batching datasets...")
         self.train_batch = self.dataset.train_dataset.batch(self.batch_size)
         self.val_batch = self.dataset.val_dataset.batch(self.batch_size)
-
-    @staticmethod
-    @tf.function
-    def pick_only_data(data, label):
-        return data
 
     def create_normalizer(self):
         """
@@ -71,7 +68,7 @@ class RegressionModel:
             train_dataset: Training dataset.
         """
         self.normalizer = Normalization()
-        self.normalizer.adapt(self.dataset.train_dataset.map(self.pick_only_data))
+        self.normalizer.adapt(self.dataset.train_dataset.map(pick_only_data))
 
     def build_model(self):
         """
@@ -79,6 +76,7 @@ class RegressionModel:
         Args:
             n_train: Number of training samples (used for learning rate decay).
         """
+        print("Building model...")
         input_layer = Input(shape=tuple(self.dataset.train_dataset.element_spec[0].shape.as_list()))
         layer = self.normalizer(input_layer)
 
@@ -105,7 +103,7 @@ class RegressionModel:
             metrics=[MeanSquaredError()]
         )
 
-    def train_model(self, train_dataset, val_dataset, epochs=None):
+    def train_model(self, train_dataset, val_dataset):
         """
         Train the model.
         Args:
@@ -113,10 +111,10 @@ class RegressionModel:
             val_dataset: Validation dataset.
             epochs: Number of training epochs (overrides default if provided).
         """
+        print("Training model...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
-        epochs = epochs or self.n_epochs
-        history = self.model.fit(train_dataset, epochs=epochs, validation_data=val_dataset)
+        history = self.model.fit(train_dataset, epochs=self.n_epochs, validation_data=val_dataset)
         self.history = history
 
     def evaluate(self):
@@ -124,6 +122,7 @@ class RegressionModel:
         Evaluate the model on the validation dataset.
         Automatically prepares the dataset if not already prepared.
         """
+        print("Evaluating model's performance...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
         
@@ -156,8 +155,8 @@ class RegressionModel:
             val_dataset: Validation dataset.
             train_dataset: Training dataset.
         """
-        y_val = self.model.predict(self.dataset.val_dataset.map(self.pick_only_data))
-        y_train = self.model.predict(self.dataset.train_dataset.map(self.pick_only_data))
+        y_val = self.model.predict(self.dataset.val_dataset.map(pick_only_data))
+        y_train = self.model.predict(self.dataset.train_dataset.map(pick_only_data))
 
         plt.figure("Model Output Distribution")
         plt.hist(y_val, bins=100, range=(0, 1), histtype='step', label='Validation Output', density=True)
@@ -167,6 +166,12 @@ class RegressionModel:
         plt.legend()
         plt.title("Output Distribution")
         plt.show()
+
+if __name__ == "__main__":
+    dataset = Dataset()
+    dataset.load_data()
+    print(len(dataset.train_dataset))
+    
 
 
 
