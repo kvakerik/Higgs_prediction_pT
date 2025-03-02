@@ -5,3 +5,5 @@ data/*
 *.pdf
 *.pth
 *.pyc
+data_test/*
+test_data/*
