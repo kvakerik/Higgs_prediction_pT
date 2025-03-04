@@ -69,7 +69,7 @@ class Dataset():
         num_processed = 0
         num_skipped = 0        
         # Process each file individually
-        for file in all_files[:5]:
+        for file in all_files[:4]:
             print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
             data = f.arrays(self.variables_higgs, library="ak")
