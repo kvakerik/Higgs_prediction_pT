@@ -6,6 +6,7 @@ import vector
 import awkward as ak
 import matplotlib.pyplot as plt 
 import numpy as np
+from src.helpers import pick_only_data, extract_data, make_filter_slice
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
@@ -38,11 +39,12 @@ class Dataset():
 
         self.train_fraction = kwargs.get('train_fraction', 0.8)
         self.file_name = kwargs.get('file_name', "data")
-        self.file_paths = kwargs.get('file_paths', "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*.root")
+        self.file_paths = kwargs.get('file_paths', "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root")
         self.val_dataset = None
         self.train_dataset = None
         self.val_events = None
         self.train_events = None
+        self.slices = None
 
     def __call__(self):
         self.load_data()
@@ -67,7 +69,7 @@ class Dataset():
         num_processed = 0
         num_skipped = 0        
         # Process each file individually
-        for file in all_files[:15]:
+        for file in all_files[:4]:
             print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
             data = f.arrays(self.variables_higgs, library="ak")
@@ -157,6 +159,7 @@ class Dataset():
         train_size_dataset = []
         val_size_dataset = []
 
+        #TODO debug train test split 
         for dataset, dataset_size in zip(datasets, n_events):
             # Determine datasets split sizes
             train_size = int(self.train_fraction * dataset_size)
@@ -175,27 +178,25 @@ class Dataset():
             else:
                 print(f"Skipping file with dataset size: {dataset_size}")
 
-            print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {val_size}")
+        #print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {val_size}")
+        #print(len(train_datasets), len(val_datasets))
 
         weights_list_train = [size / sum(train_size_dataset) for size in train_size_dataset]
         weights_list_val = [size / sum(val_size_dataset) for size in val_size_dataset]
+
         print("Dataset Successfully weighted")
-        train_events = int(self.train_fraction * total_events)
-        val_events = int(total_events - train_events)
+        train_events = sum(train_size_dataset)
+        val_events = sum(val_size_dataset)
 
         if len(val_datasets) > 0:
-            self.val_dataset = val_datasets[0]
-            for ds in val_datasets[1:]:
-                self.val_dataset = self.val_dataset.concatenate(ds)
+            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val)
 
         if len(train_datasets) > 0:
-            self.train_dataset = train_datasets[0]
-            for ds in train_datasets[1:]:
-                self.train_dataset = self.train_dataset.concatenate(ds)
+            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train)
 
         self.val_events = val_events
         self.train_events = train_events
-    
+
     def save_data(self):  
         print("saving dataset")
         os.makedirs(f"{self.file_name}", exist_ok=True)  # Ensure 'data' directory exists
@@ -209,21 +210,126 @@ class Dataset():
             f.write(f"{self.train_events}\n")
             f.write(f"{self.val_events}\n")
         print(f"Dataset Successfully saved")
-    
+
     def load_data(self):
         self.train_dataset = tf.data.Dataset.load(f"{self.file_name}/train_dataset")
         self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
             self.train_events, self.val_events = map(int, f.readlines())
 
+    def plot_distribution(self):
+        # Extract data from the TensorFlow datasets
+        y_val = extract_data(self.val_dataset.map(pick_only_data))
+        y_train = extract_data(self.train_dataset.map(pick_only_data))
+
+        plt.figure(figsize=(10, 6))
+        plt.hist(y_val, bins=100, range=(0, 1), histtype='step', label='Validation Output', density=True)
+        plt.hist(y_train, bins=100, range=(0, 1), histtype='step', label='Training Output', density=True)
+        plt.xlabel("Input Data")
+        plt.ylabel("Density")
+        plt.legend()
+        plt.title("Input Distribution")
+        plt.show()
+
+  
+class DatasetMass(Dataset):
+    def __init__(self, **kwargs): 
+        super().__init__(**kwargs)
+
+    def make_slices(self, n_slices=10):
+        bins = np.linspace(70.0, 130.0, num=n_slices+1)
+        functions = [make_filter_slice(lb, ub) for lb, ub in zip(bins[:-1], bins[1:])]
+        self.slices = [self.train_dataset.filter(fn) for fn in functions]
+
+    def get_phi_mask(self):
+        mask = []
+        for var in self.variables_higgs: 
+            #print(var)
+            if ('p4' in var) and (var != self.target_variable):
+                mask.append(False) # pt
+                mask.append(False) # eta
+                mask.append(True)  # phi
+                mask.append(False) # mass
+
+            elif (var == self.target_variable):
+                pass
+            else:
+                if 'phi' in var:
+                    mask.append(True)
+                else:
+                    mask.append(False)
+        return mask
+
+    def get_lorentz_mask(self):
+        mask = []
+        for var in self.variables_higgs: 
+            #print(var)
+            if ('p4' in var) and (var != self.target_variable):
+                mask.append(True)
+                mask.append(True)
+                mask.append(True)
+                mask.append(True)
+            elif (var == self.target_variable):
+                pass
+            else:
+                mask.append(False)
+        return mask
+
+    def load_data(self):
+        super().load_data()
+
+        ## add augmentation
+
+        ## pick mass
+        @tf.function
+        def pick_mass(data, targets):
+            return data, targets[3]
+        
+        self.train_dataset = self.train_dataset.map(pick_mass)
+        self.val_dataset = self.val_dataset.map(pick_mass)
+
+class DatasetPt(Dataset):
+    def __init__(self, **kwargs): 
+        super().__init__(**kwargs)
+
+    def get_phi_mask(self):
+        mask = []
+        for var in self.variables_higgs: 
+            #print(var)
+            if ('p4' in var) and (var != self.target_variable):
+                mask.append(False)  # pt
+                mask.append(False) # eta
+                mask.append(True) # phi
+                mask.append(False) # mass
+
+            elif (var == self.target_variable):
+                pass
+            else:
+                if 'phi' in var:
+                    mask.append(True)
+                else:
+                    mask.append(False)
+        return mask
+
+    def load_data(self):
+        super().load_data()
+
+        ## add augmentation
+        
+        ## pick mass
+        @tf.function
+        def pick_mass(data, targets):
+            return data, targets[0]
+        
+        self.train_dataset = self.train_dataset.map(pick_mass)
+        self.val_dataset = self.val_dataset.map(pick_mass)
 
 if __name__ == "__main__":
-    dataset_2 = Dataset()
-    dataset_2.build_dataset()
-    dataset_2.save_data()
-    dataset_2.load_data()
-    print("pocet eventov: ",dataset_2.val_events)
-    print("dlzka ", len(dataset_2.val_dataset))
+    dataset = Dataset()
+    dataset.build_dataset()
+    
+
+   
     
 
 
