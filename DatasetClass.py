@@ -69,7 +69,7 @@ class Dataset():
         num_processed = 0
         num_skipped = 0        
         # Process each file individually
-        for file in all_files[:4]:
+        for file in all_files:
             print("Reading file", file)
             f = uproot.open(file)['NOMINAL']
             data = f.arrays(self.variables_higgs, library="ak")
@@ -158,8 +158,12 @@ class Dataset():
         val_datasets = []
         dev_datasets = []
         
+        dev_datasets = []
+        
         train_size_dataset = []
         val_size_dataset = []
+        dev_size_dataset = []
+
         dev_size_dataset = []
 
 
@@ -172,20 +176,31 @@ class Dataset():
             dev_size = dataset_size - train_size - val_size
 
             
+            train_size = int(round(self.train_fraction * dataset_size))
+            remaining_size = dataset_size - train_size
+            val_size = round(remaining_size / 2)
+            dev_size = dataset_size - train_size - val_size
+
             
+            
+            if val_size > 0 and train_size > 0 and dev_size > 0:
             if val_size > 0 and train_size > 0 and dev_size > 0:
                 # Split datasets into train and validation data
                 train_dataset = dataset.take(train_size)
                 val_dataset = dataset.skip(train_size)
+                dev_dataset = dataset.skip(train_size + val_size)
                 dev_dataset = dataset.skip(train_size + val_size)
 
                 train_datasets.append(train_dataset)
                 val_datasets.append(val_dataset)
                 dev_datasets.append(dev_dataset)
 
+                dev_datasets.append(dev_dataset)
+
 
                 train_size_dataset.append(train_size)
                 val_size_dataset.append(val_size)
+                dev_size_dataset.append(dev_size)
                 dev_size_dataset.append(dev_size)
             else:
                 print(f"Skipping file with dataset size: {dataset_size}")
@@ -203,17 +218,28 @@ class Dataset():
 
         print("Dataset Successfully weighted")
         
+        dev_events = sum(dev_size_dataset)
+        
+        weights_list_train = [size / train_events for size in train_size_dataset]
+        weights_list_val = [size / val_events for size in val_size_dataset]
+        weights_list_dev = [size / dev_events for size in dev_size_dataset]
+
+        print("Dataset Successfully weighted")
+        
         if len(val_datasets) > 0:
-            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val)
+            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val, seed=42)
 
         if len(train_datasets) > 0:
-            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train)
+            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train, seed=42)
 
         if len(dev_datasets) > 0:
-            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev)
+            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev, seed=42)
 
         self.val_events = val_events
         self.train_events = train_events
+        self.dev_events = dev_events
+    
+    #TODO: add save and load data for dev dataset
         self.dev_events = dev_events
     
     #TODO: add save and load data for dev dataset
@@ -223,8 +249,10 @@ class Dataset():
         val_dataset = self.val_dataset
         train_dataset = self.train_dataset
         dev_dataset = self.dev_dataset
+        dev_dataset = self.dev_dataset
         val_dataset.save(f"{self.file_name}/val_dataset")
         train_dataset.save(f"{self.file_name}/train_dataset")
+        dev_dataset.save(f"{self.file_name}/dev_dataset")
         dev_dataset.save(f"{self.file_name}/dev_dataset")
 
         output_file = f"{self.file_name}/event_counts.txt"
@@ -232,13 +260,16 @@ class Dataset():
             f.write(f"{self.train_events}\n")
             f.write(f"{self.val_events}\n")
             f.write(f"{self.dev_events}\n")
+            f.write(f"{self.dev_events}\n")
         print(f"Dataset Successfully saved")
 
     def load_data(self):
         self.train_dataset = tf.data.Dataset.load(f"{self.file_name}/train_dataset")
         self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
         self.dev_dataset = tf.data.Dataset.load(f"{self.file_name}/dev_dataset")
+        self.dev_dataset = tf.data.Dataset.load(f"{self.file_name}/dev_dataset")
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
+            self.train_events, self.val_events, self.dev_events = map(int, f.readlines())
             self.train_events, self.val_events, self.dev_events = map(int, f.readlines())
 
     def plot_distribution(self):
@@ -283,6 +314,33 @@ class DatasetMass(Dataset):
                 else:
                     mask.append(False)
         return mask
+    
+    def augment_data_phi(self, n_slices=10):
+        self.make_slices(n_slices)
+        phi_mask = tf.constant(self.get_phi_mask())
+
+        @tf.function
+        def augment_phi(data, target):
+            # generate random rotation angle
+            angle = tf.random.uniform(shape=(tf.shape(data)[0],), minval=-np.pi, maxval=np.pi)
+            #tf.print("angle: ", angle.shape)
+            #tf.print("data: ", data.shape)
+            # apply rotation
+            data  = tf.where(phi_mask, data + angle, data)
+            
+            # normalize angles between -pi and pi
+            data = tf.where(phi_mask, tf.math.atan2(tf.sin(data), tf.cos(data)), data)
+            
+            return data, target
+
+        # sample from the slices
+        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
+        new_dataset = new_dataset.take(self.train_events)
+
+        # apply augmentation
+        augmented_dataset = new_dataset.map(augment_phi)
+        #TODO Ask Dan about concatenation of new dataset to train dataset 
+        self.train_dataset = augmented_dataset
 
     def get_lorentz_mask(self):
         mask = []
@@ -298,12 +356,68 @@ class DatasetMass(Dataset):
             else:
                 mask.append(False)
         return mask
+    
+    def augment_data_lorentz(self, n_slices=10):
+
+        self.make_slices(n_slices)
+        lorentz_mask = tf.constant(self.get_lorentz_mask())
+        lorentz_indices = tf.squeeze(tf.where(lorentz_mask), axis=1) # [0 1 2 3 4 5 6 7 13 14 ...] 
+        n_vectors = tf.shape(lorentz_indices)[0] // 4 # number of 4-vectors
+        lorentz_indices_4d = tf.reshape(lorentz_indices, (n_vectors, 4))  # [n_vectors, 4]
+
+        @tf.function
+        def augment_lorentz(data, target):
+            beta = tf.random.uniform(shape = (), minval=-0.98, maxval=0.98) # Shape ()
+            #tf.print("used beta: ", beta)
+            gamma = 1.0 / tf.sqrt(1.0 - beta**2) # Shape ()
+            #tf.print("used gamma: ", gamma)
+            
+            for i in range(n_vectors):
+                vec_indices = lorentz_indices_4d[i] # Shape (4,)
+                pt = data[vec_indices[0]] # scalar values
+                eta = data[vec_indices[1]]
+                #tf.print("eta: ", eta)
+                phi = data[vec_indices[2]]
+                E = data[vec_indices[3]]
+                #tf.print("E: ", E)
+                #print(E.shape)
+                
+                # Convert to Cartesian coordinates
+                #px = pt * tf.cos(phi)
+                #py = pt * tf.sin(phi)
+                pz = pt * tf.sinh(eta) # Shape ()
+                #tf.print("pz: ", pz)
+
+                E_prime = gamma * (E - beta * pz) # Shape ()
+                #tf.print("E_prime: ", E_prime)
+                pz_prime = gamma * (pz - beta * E) 
+                
+                epsilon = 1e-8
+                eta_prime = tf.asinh(pz_prime / (pt + epsilon)) # Shape ()
+                #tf.print("eta_prime: ", eta_prime)
+                update_indices = tf.reshape(vec_indices, [-1, 1])  # Shape (4, 1)
+                update_values = tf.stack([pt, eta_prime, phi, E_prime]) # Shape (4,)
+                # Update the tensor
+                data = tf.tensor_scatter_nd_update(
+                    data,
+                    indices=update_indices,
+                    updates=update_values
+                )
+                #print(data.shape)
+                
+            return data, target
+
+        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
+        new_dataset = new_dataset.take(self.train_events)
+        augmented_dataset = new_dataset.map(augment_lorentz)
+
+        #TODO Ask Dan about concatenation of new dataset to train dataset
+        self.train_dataset = augmented_dataset
 
     def load_data(self):
         super().load_data()
 
         ## add augmentation
-
         ## pick mass
         @tf.function
         def pick_mass(data, targets):
@@ -311,6 +425,9 @@ class DatasetMass(Dataset):
         
         self.train_dataset = self.train_dataset.map(pick_mass)
         self.val_dataset = self.val_dataset.map(pick_mass)
+        self.dev_dataset = self.dev_dataset.map(pick_mass)
+
+
 
 class DatasetPt(Dataset):
     def __init__(self, **kwargs): 
@@ -341,15 +458,26 @@ class DatasetPt(Dataset):
         ## add augmentation
         
         ## pick pt
+        ## pick pt
         @tf.function
+        def pick_pt(data, targets):
         def pick_pt(data, targets):
             return data, targets[0]
         
         self.train_dataset = self.train_dataset.map(pick_pt)
         self.val_dataset = self.val_dataset.map(pick_pt)
+        self.dev_dataset = self.dev_dataset.map(pick_pt)
 
 if __name__ == "__main__":
     dataset = Dataset()
+    dataset.load_data()
+
+    print(dataset.train_events)
+    print(dataset.val_events)
+    print(dataset.dev_events)
+   
+
+
     dataset.load_data()
 
     print(dataset.train_events)
