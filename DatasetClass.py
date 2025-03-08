@@ -4,7 +4,7 @@ import uproot
 import glob
 import vector
 import awkward as ak
-import matplotlib.pyplot as plt 
+# import matplotlib.pyplot as plt 
 import numpy as np
 from src.helpers import pick_only_data, extract_data, make_filter_slice
 
@@ -156,66 +156,90 @@ class Dataset():
         
         train_datasets = []
         val_datasets = []
+        dev_datasets = []
+        
         train_size_dataset = []
         val_size_dataset = []
+        dev_size_dataset = []
+
 
         #TODO debug train test split 
         for dataset, dataset_size in zip(datasets, n_events):
             # Determine datasets split sizes
-            train_size = int(self.train_fraction * dataset_size)
-            val_size = dataset_size - train_size
+            train_size = int(round(self.train_fraction * dataset_size))
+            remaining_size = dataset_size - train_size
+            val_size = round(remaining_size / 2)
+            dev_size = dataset_size - train_size - val_size
+
             
-            if val_size > 0 and train_size > 0:
+            
+            if val_size > 0 and train_size > 0 and dev_size > 0:
                 # Split datasets into train and validation data
                 train_dataset = dataset.take(train_size)
                 val_dataset = dataset.skip(train_size)
+                dev_dataset = dataset.skip(train_size + val_size)
 
                 train_datasets.append(train_dataset)
                 val_datasets.append(val_dataset)
+                dev_datasets.append(dev_dataset)
+
 
                 train_size_dataset.append(train_size)
                 val_size_dataset.append(val_size)
+                dev_size_dataset.append(dev_size)
             else:
                 print(f"Skipping file with dataset size: {dataset_size}")
 
         #print(f"Dataset size: {dataset_size}, Training size: {train_size}, Validation size: {val_size}")
         #print(len(train_datasets), len(val_datasets))
 
-        weights_list_train = [size / sum(train_size_dataset) for size in train_size_dataset]
-        weights_list_val = [size / sum(val_size_dataset) for size in val_size_dataset]
-
-        print("Dataset Successfully weighted")
         train_events = sum(train_size_dataset)
         val_events = sum(val_size_dataset)
+        dev_events = sum(dev_size_dataset)
+        
+        weights_list_train = [size / train_events for size in train_size_dataset]
+        weights_list_val = [size / val_events for size in val_size_dataset]
+        weights_list_dev = [size / dev_events for size in dev_size_dataset]
 
+        print("Dataset Successfully weighted")
+        
         if len(val_datasets) > 0:
             self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val)
 
         if len(train_datasets) > 0:
             self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train)
 
+        if len(dev_datasets) > 0:
+            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev)
+
         self.val_events = val_events
         self.train_events = train_events
-
+        self.dev_events = dev_events
+    
+    #TODO: add save and load data for dev dataset
     def save_data(self):  
         print("saving dataset")
         os.makedirs(f"{self.file_name}", exist_ok=True)  # Ensure 'data' directory exists
         val_dataset = self.val_dataset
         train_dataset = self.train_dataset
+        dev_dataset = self.dev_dataset
         val_dataset.save(f"{self.file_name}/val_dataset")
         train_dataset.save(f"{self.file_name}/train_dataset")
+        dev_dataset.save(f"{self.file_name}/dev_dataset")
 
         output_file = f"{self.file_name}/event_counts.txt"
         with open(output_file, "w") as f:
             f.write(f"{self.train_events}\n")
             f.write(f"{self.val_events}\n")
+            f.write(f"{self.dev_events}\n")
         print(f"Dataset Successfully saved")
 
     def load_data(self):
         self.train_dataset = tf.data.Dataset.load(f"{self.file_name}/train_dataset")
         self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
+        self.dev_dataset = tf.data.Dataset.load(f"{self.file_name}/dev_dataset")
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
-            self.train_events, self.val_events = map(int, f.readlines())
+            self.train_events, self.val_events, self.dev_events = map(int, f.readlines())
 
     def plot_distribution(self):
         # Extract data from the TensorFlow datasets
@@ -316,17 +340,24 @@ class DatasetPt(Dataset):
 
         ## add augmentation
         
-        ## pick mass
+        ## pick pt
         @tf.function
-        def pick_mass(data, targets):
+        def pick_pt(data, targets):
             return data, targets[0]
         
-        self.train_dataset = self.train_dataset.map(pick_mass)
-        self.val_dataset = self.val_dataset.map(pick_mass)
+        self.train_dataset = self.train_dataset.map(pick_pt)
+        self.val_dataset = self.val_dataset.map(pick_pt)
 
 if __name__ == "__main__":
     dataset = Dataset()
-    dataset.build_dataset()
+    dataset.load_data()
+
+    print(dataset.train_events)
+    print(dataset.val_events)
+    print(dataset.dev_events)
+   
+
+
     
 
    

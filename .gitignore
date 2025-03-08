@@ -7,3 +7,5 @@ data/*
 *.pyc
 data_test/*
 test_data/*
+erik_data/*
+*.db

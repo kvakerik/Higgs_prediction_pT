@@ -60,6 +60,7 @@ class RegressionModel:
         print("Batching datasets...")
         self.train_batch = self.dataset.train_dataset.batch(self.batch_size)
         self.val_batch = self.dataset.val_dataset.batch(self.batch_size)
+        self.dev_batch = self.dataset.dev_dataset.batch(self.batch_size)
 
     def create_normalizer(self):
         """
