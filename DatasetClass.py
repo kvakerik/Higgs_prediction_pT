@@ -158,8 +158,6 @@ class Dataset():
         val_datasets = []
         dev_datasets = []
         
-        dev_datasets = []
-        
         train_size_dataset = []
         val_size_dataset = []
         dev_size_dataset = []
@@ -175,32 +173,18 @@ class Dataset():
             val_size = round(remaining_size / 2)
             dev_size = dataset_size - train_size - val_size
 
-            
-            train_size = int(round(self.train_fraction * dataset_size))
-            remaining_size = dataset_size - train_size
-            val_size = round(remaining_size / 2)
-            dev_size = dataset_size - train_size - val_size
-
-            
-            
-            if val_size > 0 and train_size > 0 and dev_size > 0:
             if val_size > 0 and train_size > 0 and dev_size > 0:
                 # Split datasets into train and validation data
                 train_dataset = dataset.take(train_size)
                 val_dataset = dataset.skip(train_size)
-                dev_dataset = dataset.skip(train_size + val_size)
                 dev_dataset = dataset.skip(train_size + val_size)
 
                 train_datasets.append(train_dataset)
                 val_datasets.append(val_dataset)
                 dev_datasets.append(dev_dataset)
 
-                dev_datasets.append(dev_dataset)
-
-
                 train_size_dataset.append(train_size)
                 val_size_dataset.append(val_size)
-                dev_size_dataset.append(dev_size)
                 dev_size_dataset.append(dev_size)
             else:
                 print(f"Skipping file with dataset size: {dataset_size}")
@@ -240,19 +224,14 @@ class Dataset():
         self.dev_events = dev_events
     
     #TODO: add save and load data for dev dataset
-        self.dev_events = dev_events
-    
-    #TODO: add save and load data for dev dataset
     def save_data(self):  
         print("saving dataset")
         os.makedirs(f"{self.file_name}", exist_ok=True)  # Ensure 'data' directory exists
         val_dataset = self.val_dataset
         train_dataset = self.train_dataset
         dev_dataset = self.dev_dataset
-        dev_dataset = self.dev_dataset
         val_dataset.save(f"{self.file_name}/val_dataset")
         train_dataset.save(f"{self.file_name}/train_dataset")
-        dev_dataset.save(f"{self.file_name}/dev_dataset")
         dev_dataset.save(f"{self.file_name}/dev_dataset")
 
         output_file = f"{self.file_name}/event_counts.txt"
@@ -260,16 +239,13 @@ class Dataset():
             f.write(f"{self.train_events}\n")
             f.write(f"{self.val_events}\n")
             f.write(f"{self.dev_events}\n")
-            f.write(f"{self.dev_events}\n")
         print(f"Dataset Successfully saved")
 
     def load_data(self):
         self.train_dataset = tf.data.Dataset.load(f"{self.file_name}/train_dataset")
         self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
         self.dev_dataset = tf.data.Dataset.load(f"{self.file_name}/dev_dataset")
-        self.dev_dataset = tf.data.Dataset.load(f"{self.file_name}/dev_dataset")
         with open(f"{self.file_name}/event_counts.txt", "r") as f:
-            self.train_events, self.val_events, self.dev_events = map(int, f.readlines())
             self.train_events, self.val_events, self.dev_events = map(int, f.readlines())
 
     def plot_distribution(self):
@@ -428,7 +404,6 @@ class DatasetMass(Dataset):
         self.dev_dataset = self.dev_dataset.map(pick_mass)
 
 
-
 class DatasetPt(Dataset):
     def __init__(self, **kwargs): 
         super().__init__(**kwargs)
@@ -458,9 +433,7 @@ class DatasetPt(Dataset):
         ## add augmentation
         
         ## pick pt
-        ## pick pt
         @tf.function
-        def pick_pt(data, targets):
         def pick_pt(data, targets):
             return data, targets[0]
         
@@ -475,15 +448,7 @@ if __name__ == "__main__":
     print(dataset.train_events)
     print(dataset.val_events)
     print(dataset.dev_events)
-   
 
-
-    dataset.load_data()
-
-    print(dataset.train_events)
-    print(dataset.val_events)
-    print(dataset.dev_events)
-   
 
 
     
