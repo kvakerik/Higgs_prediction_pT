@@ -27,6 +27,7 @@ class RegressionModel:
         self.n_layers = kwargs.get('n_layers', 4)
         self.initial_learning_rate = kwargs.get('initial_learning_rate', 0.001)
         self.n_epochs = kwargs.get('n_epochs', 10)
+        self.n_normalizer_samples = kwargs.get('n_normalizer_samples', 64)
     
     def save(self):
         if self.model is None:
@@ -69,7 +70,7 @@ class RegressionModel:
             train_dataset: Training dataset.
         """
         self.normalizer = Normalization()
-        self.normalizer.adapt(self.dataset.train_dataset.map(pick_only_data))
+        self.normalizer.adapt(self.dataset.dev_dataset.map(pick_only_data).take(self.n_normalizer_samples)) #TODO change to train_dataset
 
     def build_model(self):
         """
@@ -92,7 +93,7 @@ class RegressionModel:
         # Define learning rate decay schedule
         learning_rate = CosineDecay(
             initial_learning_rate = self.initial_learning_rate,
-            decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
+            decay_steps = self.n_epochs * self.dataset.dev_events // self.batch_size, #TODO change to train_dataset
             alpha = self.initial_learning_rate
         )
 
@@ -104,7 +105,7 @@ class RegressionModel:
             metrics=[MeanSquaredError()]
         )
 
-    def train_model(self, train_dataset, val_dataset):
+    def train_model(self):
         """
         Train the model.
         Args:
@@ -115,7 +116,7 @@ class RegressionModel:
         print("Training model...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
-        history = self.model.fit(train_dataset, epochs=self.n_epochs, validation_data=val_dataset)
+        history = self.model.fit(self.dev_batch, epochs=self.n_epochs, validation_data=self.val_batch)
         self.history = history
 
     def evaluate(self):
