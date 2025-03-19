@@ -162,10 +162,6 @@ class Dataset():
         val_size_dataset = []
         dev_size_dataset = []
 
-        dev_size_dataset = []
-
-
-        #TODO debug train test split 
         for dataset, dataset_size in zip(datasets, n_events):
             # Determine datasets split sizes
             train_size = int(round(self.train_fraction * dataset_size))
@@ -194,14 +190,6 @@ class Dataset():
 
         train_events = sum(train_size_dataset)
         val_events = sum(val_size_dataset)
-        dev_events = sum(dev_size_dataset)
-        
-        weights_list_train = [size / train_events for size in train_size_dataset]
-        weights_list_val = [size / val_events for size in val_size_dataset]
-        weights_list_dev = [size / dev_events for size in dev_size_dataset]
-
-        print("Dataset Successfully weighted")
-        
         dev_events = sum(dev_size_dataset)
         
         weights_list_train = [size / train_events for size in train_size_dataset]
@@ -311,7 +299,7 @@ class DatasetMass(Dataset):
 
         # sample from the slices
         new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
-        new_dataset = new_dataset.take(self.train_events)
+        new_dataset = new_dataset.take(100000) #TODO self.train_events
 
         # apply augmentation
         augmented_dataset = new_dataset.map(augment_phi)
@@ -384,7 +372,8 @@ class DatasetMass(Dataset):
             return data, target
 
         new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
-        new_dataset = new_dataset.take(self.train_events)
+        new_dataset = new_dataset.take(100000) #TODO self.train_events
+
         augmented_dataset = new_dataset.map(augment_lorentz)
 
         #TODO Ask Dan about concatenation of new dataset to train dataset
