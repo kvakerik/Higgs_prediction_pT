@@ -13,7 +13,7 @@ os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 tf.get_logger().setLevel('ERROR')
 gpus = tf.config.list_physical_devices('GPU')
-# print("Available GPUs:", gpus)
+print("Available GPUs:", gpus)
 
 #path_sig = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*VBFH*.root"
 #path_bkg = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*Ztt*.root"
@@ -199,13 +199,13 @@ class Dataset():
         print("Dataset Successfully weighted")
         
         if len(val_datasets) > 0:
-            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val, seed=42)
+            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val)
 
         if len(train_datasets) > 0:
-            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train, seed=42)
+            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train)
 
         if len(dev_datasets) > 0:
-            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev, seed=42)
+            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev)
 
         self.val_events = val_events
         self.train_events = train_events
@@ -371,7 +371,7 @@ class DatasetMass(Dataset):
                 
             return data, target
 
-        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
+        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
         new_dataset = new_dataset.take(100000) #TODO self.train_events
 
         augmented_dataset = new_dataset.map(augment_lorentz)

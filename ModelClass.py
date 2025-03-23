@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from DatasetClass import Dataset
-from tensorflow.keras.layers import Normalization, Input, Dense, BatchNormalization, Dropout
+from tensorflow.keras.layers import Normalization, Input, Dense, BatchNormalization, Dropout, Activation
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model, load_model
@@ -71,7 +71,7 @@ class RegressionModel:
             train_dataset: Training dataset.
         """
         self.normalizer = Normalization()
-        self.normalizer.adapt(self.dataset.train_dataset.map(pick_only_data).take(self.n_normalizer_samples)) #TODO change to train_dataset
+        self.normalizer.adapt(self.dataset.train_dataset.map(pick_only_data).take(self.n_normalizer_samples))
 
     def build_model(self):
         """
@@ -84,16 +84,17 @@ class RegressionModel:
         layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
-            layer = Dense(self.hidden_layer_size // self.n_layers,activation=self.activation_function)(layer)
-            layer = BatchNormalization()(layer)
-            layer = Dropout(self.dropout_rate)(layer)
+            layer = Dense(self.hidden_layer_size // self.n_layers, use_bias=False)(layer) 
+            layer = BatchNormalization()(layer) 
+            layer = Activation(self.activation_function)(layer) 
+            layer = Dropout(self.dropout_rate)(layer) 
 
         output_layer = Dense(1, activation=None)(layer)
 
         # Define learning rate decay schedule
         learning_rate = CosineDecay(
             initial_learning_rate = self.initial_learning_rate,
-            decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size, #TODO change to train_dataset
+            decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
             alpha = 0.0
         )
 
