@@ -3,18 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from DatasetClass import Dataset
-from tensorflow.keras.layers import Normalization, Input, Dense
+from tensorflow.keras.layers import Normalization, Input, Dense, BatchNormalization, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.losses import MeanSquaredError
+from tensorflow.keras.losses import MeanSquaredError, MeanAbsolutePercentageError
 from src.helpers import pick_only_data
 
 class RegressionModel:
     def __init__(self, dataset, **kwargs):
         self.dataset = dataset
         self.normalizer = None
-        self.history = None
         self.model = None
         self.history = None
         """
@@ -27,7 +26,9 @@ class RegressionModel:
         self.n_layers = kwargs.get('n_layers', 4)
         self.initial_learning_rate = kwargs.get('initial_learning_rate', 0.001)
         self.n_epochs = kwargs.get('n_epochs', 10)
-        self.n_normalizer_samples = kwargs.get('n_normalizer_samples', 64)
+        self.n_normalizer_samples = kwargs.get('n_normalizer_samples', 20)
+        self.weight_decay = kwargs.get('weight_decay', 1e-5)
+        self.dropout_rate = kwargs.get('dropout_rate', 0.2)
     
     def save(self):
         if self.model is None:
@@ -59,9 +60,9 @@ class RegressionModel:
         Prepare the dataset for training and validation. 
         """
         print("Batching datasets...")
-        self.train_batch = self.dataset.train_dataset.batch(self.batch_size)
-        self.val_batch = self.dataset.val_dataset.batch(self.batch_size)
-        self.dev_batch = self.dataset.dev_dataset.batch(self.batch_size)
+        self.train_batch = self.dataset.train_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+        self.val_batch = self.dataset.val_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+        self.dev_batch = self.dataset.dev_dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
 
     def create_normalizer(self):
         """
@@ -70,7 +71,7 @@ class RegressionModel:
             train_dataset: Training dataset.
         """
         self.normalizer = Normalization()
-        self.normalizer.adapt(self.dataset.dev_dataset.map(pick_only_data).take(self.n_normalizer_samples)) #TODO change to train_dataset
+        self.normalizer.adapt(self.dataset.train_dataset.map(pick_only_data).take(self.n_normalizer_samples)) #TODO change to train_dataset
 
     def build_model(self):
         """
@@ -83,26 +84,25 @@ class RegressionModel:
         layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
-            layer = Dense(
-                self.hidden_layer_size // self.n_layers,
-                activation=self.activation_function
-            )(layer)
+            layer = Dense(self.hidden_layer_size // self.n_layers,activation=self.activation_function)(layer)
+            layer = BatchNormalization()(layer)
+            layer = Dropout(self.dropout_rate)(layer)
 
         output_layer = Dense(1, activation=None)(layer)
 
         # Define learning rate decay schedule
         learning_rate = CosineDecay(
             initial_learning_rate = self.initial_learning_rate,
-            decay_steps = self.n_epochs * self.dataset.dev_events // self.batch_size, #TODO change to train_dataset
-            alpha = self.initial_learning_rate
+            decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size, #TODO change to train_dataset
+            alpha = 0.0
         )
 
         # Compile the model
         self.model = Model(inputs=input_layer, outputs=output_layer)
         self.model.compile(
-            optimizer=Adam(learning_rate=learning_rate),
+            optimizer=Adam(learning_rate=learning_rate, weight_decay=self.weight_decay),
             loss=MeanSquaredError(),
-            metrics=[MeanSquaredError()]
+            metrics=[MeanSquaredError(), MeanAbsolutePercentageError()]
         )
 
     def train_model(self):
@@ -116,7 +116,7 @@ class RegressionModel:
         print("Training model...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
-        history = self.model.fit(self.dev_batch, epochs=self.n_epochs, validation_data=self.val_batch)
+        history = self.model.fit(self.train_batch, epochs=self.n_epochs, validation_data=self.dev_batch)
         self.history = history
 
     def evaluate(self):

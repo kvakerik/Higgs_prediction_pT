@@ -26,6 +26,7 @@ def main():
     logger.info(f"Loading data from: {patrik_data}") # Log the data loading path
     dataset = DatasetMass(file_paths=patrik_data, file_name = "data")
     dataset.load_data()
+    #dataset.augment_data_phi(n_slices=1000)
     logger.info("Data loaded successfully.")  # Log success
 
     def objective(trial):
@@ -34,12 +35,14 @@ def main():
             logger.info(f"Starting trial: {trial.number}") # Log the trial number
             model = RegressionModel(
                 dataset,
-                n_layers             = trial.suggest_int('n_layers', 1, 5),
-                hidden_layer_size    = trial.suggest_int('hidden_layer_size', 32, 1024),
-                initial_learning_rate= trial.suggest_float('initial_learning_rate', 1e-4, 1e-2, log=True),
-                n_epochs             = trial.suggest_int('n_epochs', 10, 100, step=10),
+                n_layers             = trial.suggest_int('n_layers', 2, 4),
+                hidden_layer_size    = trial.suggest_int('hidden_layer_size', 512, 1024),
+                initial_learning_rate= trial.suggest_float('initial_learning_rate', 2e-3, 1e-2, log=True),
+                n_epochs             = trial.suggest_int('n_epochs', 10, 20, step=5),
                 activation_function  = 'relu',
-                batch_size           = trial.suggest_int('batch_size', 512, 6556,step=512),
+                batch_size           = trial.suggest_int('batch_size', 1024, 6144,step=512),
+                dropout_rate         = trial.suggest_float('dropout_rate', 0.1, 0.5),
+                weight_decay         = trial.suggest_float('weight_decay', 1e-5, 1e-3, log=True)
 
             )
 
@@ -56,7 +59,7 @@ def main():
             logger.exception(f"Trial {trial.number} failed: {e}")  # Log exceptions with traceback
             raise  # Re-raise the exception to ensure Optuna handles it correctly
 
-    study = optuna.create_study(storage="sqlite:///optuna.db", study_name="Higgs_analysis_batch_job", direction='minimize', load_if_exists=True)
+    study = optuna.create_study(storage="sqlite:///optuna.db", study_name="Higgs_analysis_2", direction='minimize', load_if_exists=True)
     logger.info("Optuna study created/loaded.")  # Log study creation
 
     def run_dashboard():
@@ -69,7 +72,7 @@ def main():
     logger.info("Optuna dashboard started.")
 
     def run_optuna():
-        study.optimize(objective, n_trials=100, n_jobs=2)
+        study.optimize(objective, n_trials=100, n_jobs=1)
 
     # Run Optuna in a separate thread so the dashboard can be accessed in real-time
     optuna_thread = threading.Thread(target=run_optuna)
