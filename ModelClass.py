@@ -93,10 +93,11 @@ class RegressionModel:
         """
         print("Building model...")
         input_layer = Input(shape=tuple(self.dataset.train_dataset.element_spec[0].shape.as_list()))
-        layer = self.normalizer(input_layer)
+
+        #layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
-            layer = Dense(self.hidden_layer_size // self.n_layers, use_bias=False)(layer) 
+            layer = Dense(self.hidden_layer_size // self.n_layers, use_bias=False)(input_layer) 
             layer = BatchNormalization()(layer) 
             layer = Activation(self.activation_function)(layer) 
             layer = Dropout(self.dropout_rate)(layer) 
@@ -184,10 +185,7 @@ class RegressionModel:
         plt.title("Output Distribution")
         plt.show()
 
-if __name__ == "__main__":
-    dataset = Dataset()
-    dataset.load_data()
-    print(len(dataset.train_dataset))
+
     
 
 

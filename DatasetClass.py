@@ -218,6 +218,7 @@ class Dataset():
         val_dataset = self.val_dataset
         train_dataset = self.train_dataset
         dev_dataset = self.dev_dataset
+
         val_dataset.save(f"{self.file_name}/val_dataset")
         train_dataset.save(f"{self.file_name}/train_dataset")
         dev_dataset.save(f"{self.file_name}/dev_dataset")
@@ -285,25 +286,16 @@ class DatasetMass(Dataset):
 
         @tf.function
         def augment_phi(data, target):
-            # generate random rotation angle
             angle = tf.random.uniform(shape=(tf.shape(data)[0],), minval=-np.pi, maxval=np.pi)
-            #tf.print("angle: ", angle.shape)
-            #tf.print("data: ", data.shape)
-            # apply rotation
             data  = tf.where(phi_mask, data + angle, data)
-            
-            # normalize angles between -pi and pi
             data = tf.where(phi_mask, tf.math.atan2(tf.sin(data), tf.cos(data)), data)
             
             return data, target
 
-        # sample from the slices
-        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
-        new_dataset = new_dataset.take(100000) #TODO self.train_events
-
-        # apply augmentation
+        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
+        new_dataset = new_dataset.take(self.train_events)
         augmented_dataset = new_dataset.map(augment_phi)
-        #TODO Ask Dan about concatenation of new dataset to train dataset 
+
         self.train_dataset = augmented_dataset
 
     def get_lorentz_mask(self):
@@ -378,6 +370,7 @@ class DatasetMass(Dataset):
 
         #TODO Ask Dan about concatenation of new dataset to train dataset
         self.train_dataset = augmented_dataset
+        self.train_events = 100000
 
     def load_data(self):
         super().load_data()
