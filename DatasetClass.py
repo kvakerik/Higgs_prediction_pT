@@ -172,8 +172,8 @@ class Dataset():
             if val_size > 0 and train_size > 0 and dev_size > 0:
                 # Split datasets into train and validation data
                 train_dataset = dataset.take(train_size)
-                val_dataset = dataset.skip(train_size)
-                dev_dataset = dataset.skip(train_size + val_size)
+                val_dataset = dataset.skip(train_size).take(val_size)
+                dev_dataset = dataset.skip(train_size + val_size).take(dev_size)
 
                 train_datasets.append(train_dataset)
                 val_datasets.append(val_dataset)

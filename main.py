@@ -1,87 +1,88 @@
 from ModelClass import RegressionModel
-from DatasetClass import Dataset, DatasetMass
-from src.helpers import make_filter_slice
-import tensorflow as tf
-import threading
-import logging 
-import sys
-sys.path.append("/home/kvake/.local/lib/python3.11/site-packages")
-import optuna   # Import Optuna            
-sys.path.append("/home/kvake/.local/lib/python3.9/site-packages")  # Adjust if needed
-from optuna_dashboard import run_server
+from DatasetClass import DatasetPt
+import logging
+import os
+import itertools
 
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level (INFO, DEBUG, WARNING, ERROR, CRITICAL)
-    format="%(asctime)s - %(levelname)s - %(message)s",  
-    handlers=[
-        logging.StreamHandler(sys.stdout), 
-    ]
-)
+# === Nastav logger: iba do súboru, nič do stdout ===
+logger = logging.getLogger("training_logger")
+logger.setLevel(logging.INFO)
 
-logger = logging.getLogger(__name__)  # Create a logger instance
+if not logger.handlers:
+    os.makedirs("logs", exist_ok=True)
+    file_handler = logging.FileHandler("logs/train.log")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    logger.addHandler(file_handler)
 
 def main():
+    # === Načítaj dáta ===
+    erik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root"
+    logger.info(f"Loading data from: {erik_data}")
 
-    patrik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root"  # No changes here
-    logger.info(f"Loading data from: {patrik_data}") # Log the data loading path
-    dataset = DatasetMass(file_paths=patrik_data, file_name = "data")
+    dataset = DatasetPt(file_paths=erik_data, file_name="erik_data")
     dataset.load_data()
-    #dataset.augment_data_phi(n_slices=1000)
-    logger.info("Data loaded successfully.")  # Log success
+    logger.info("Data loaded successfully.")
 
-    def objective(trial):
+    # === Grid search ===
+    param_grid = {
+        'batch_size': [3200, 6400],
+        'learning_rate': [0.01, 0.1],
+        'epochs': [20, 30],
+        'n_layers': [4, 6],
+        'hidden_layer_size': [1024, 2048],
+        'dropout_rate': [0.1, 0.5],
+        'weight_decay': [1e-5, 1e-3]
+    }
 
-        try: #Added try and except block for handling possible exceptions
-            logger.info(f"Starting trial: {trial.number}") # Log the trial number
-            model = RegressionModel(
-                dataset,
-                n_layers             = trial.suggest_int('n_layers', 2, 4),
-                hidden_layer_size    = trial.suggest_int('hidden_layer_size', 512, 1024),
-                initial_learning_rate= trial.suggest_float('initial_learning_rate', 2e-3, 1e-2, log=True),
-                n_epochs             = trial.suggest_int('n_epochs', 10, 20, step=5),
-                activation_function  = 'relu',
-                batch_size           = trial.suggest_int('batch_size', 1024, 6144,step=512),
-                dropout_rate         = trial.suggest_float('dropout_rate', 0.1, 0.5),
-                weight_decay         = trial.suggest_float('weight_decay', 1e-5, 1e-3, log=True)
+    iterable = list(itertools.product(*param_grid.values()))
+    best_params = None
+    best_loss = float('inf')
 
-            )
+    for i, params in enumerate(iterable):
+        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val = params
 
-            model.prepare_dataset()
-            model.create_normalizer()
-            model.build_model()
-            model.train_model()
+        logger.info(f"\n{'='*80}")
+        logger.info(
+            f"[{i+1}/{len(iterable)}] Trénujeme s hyperparametrami:\n"
+            f"  batch_size={batch_size_val}, learning_rate={learning_rate_val}, epochs={epochs_val},\n"
+            f"  n_layers={n_layers_val}, hidden_layer_size={hidden_size_val},\n"
+            f"  dropout_rate={dropout_val}, weight_decay={weight_decay_val}"
+        )
 
-            val_loss, _ = model.model.evaluate(model.val_batch, verbose=0)
-            logger.info(f"Trial {trial.number} finished. Validation loss: {val_loss}")  # Log validation loss
-            return val_loss
+        model = RegressionModel(
+            dataset=dataset,
+            batch_size=batch_size_val,
+            initial_learning_rate=learning_rate_val,
+            n_epochs=epochs_val,
+            n_layers=n_layers_val,
+            hidden_layer_size=hidden_size_val,
+            dropout_rate=dropout_val,
+            weight_decay=weight_decay_val
+        )
 
-        except Exception as e:
-            logger.exception(f"Trial {trial.number} failed: {e}")  # Log exceptions with traceback
-            raise  # Re-raise the exception to ensure Optuna handles it correctly
+        model.prepare_dataset()
+        model.create_normalizer()
+        model.build_model()
+        model.train_model()
+        model.plot_history()
 
-    study = optuna.create_study(storage="sqlite:///optuna.db", study_name="Higgs_analysis_2", direction='minimize', load_if_exists=True)
-    logger.info("Optuna study created/loaded.")  # Log study creation
+        final_loss = model.history.history['loss'][-1]
+        logger.info(f"Final training loss: {final_loss:.6f}")
 
-    def run_dashboard():
-        server = run_server("sqlite:///optuna.db", host="0.0.0.0", port=8080)
-        server.run()  # Run dashboard continuously in a separate thread
+        if final_loss < best_loss:
+            best_loss = final_loss
+            best_params = params
 
-    dashboard_thread = threading.Thread(target=run_dashboard)
-    dashboard_thread.daemon = True  # Ensures it stops when the script ends
-    dashboard_thread.start()
-    logger.info("Optuna dashboard started.")
+    logger.info("\n=== Najlepšie hyperparametre ===")
+    logger.info(
+        f"batch_size={best_params[0]}, learning_rate={best_params[1]}, epochs={best_params[2]},\n"
+        f"n_layers={best_params[3]}, hidden_layer_size={best_params[4]},\n"
+        f"dropout_rate={best_params[5]}, weight_decay={best_params[6]}"
+    )
+    logger.info(f"Najnižšia dosažená tréningová loss: {best_loss:.6f}")
 
-    def run_optuna():
-        study.optimize(objective, n_trials=100, n_jobs=1)
-
-    # Run Optuna in a separate thread so the dashboard can be accessed in real-time
-    optuna_thread = threading.Thread(target=run_optuna)
-    optuna_thread.start()
-
-    optuna_thread.join()  # Wait for Optuna to finish before printing results
-    logger.info("Optuna optimization finished.") # Log completion
-    print("Number of finished trials:", len(study.trials))  # This will still go to stdout (job.out)
-    print("Best trial:", study.best_trial.params) # This will still go to stdout (job.out)
+    # Finálne echo do job.out
+    print("Tréning dokončený detailné logy nájdeš v logs/train.log")
 
 if __name__ == "__main__":
     main()

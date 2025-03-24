@@ -8,7 +8,19 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.losses import MeanSquaredError, MeanAbsolutePercentageError
-from src.helpers import pick_only_data
+from src.helpers import pick_only_data, EpochLogger
+import logging
+
+# Logger zapisuje len do súboru, nie do stdout
+logger = logging.getLogger("training_logger")
+logger.setLevel(logging.INFO)
+
+# Ak ešte nie je nastavený handler (kvôli opakovanému importu), pridaj ho
+if not logger.handlers:
+    os.makedirs("logs", exist_ok=True)
+    file_handler = logging.FileHandler("logs/train.log")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    logger.addHandler(file_handler)
 
 class RegressionModel:
     def __init__(self, dataset, **kwargs):
@@ -108,16 +120,18 @@ class RegressionModel:
 
     def train_model(self):
         """
-        Train the model.
-        Args:
-            train_dataset: Training dataset.
-            val_dataset: Validation dataset.
-            epochs: Number of training epochs (overrides default if provided).
+        Train the model and log results after each epoch using EpochLogger callback.
         """
-        print("Training model...")
+        logger.info("Training model...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
-        history = self.model.fit(self.train_batch, epochs=self.n_epochs, validation_data=self.dev_batch)
+
+        history = self.model.fit(
+            self.train_batch,
+            epochs=self.n_epochs,
+            validation_data=self.dev_batch,
+            callbacks=[EpochLogger(logger)]
+        )
         self.history = history
 
     def evaluate(self):
