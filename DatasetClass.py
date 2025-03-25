@@ -287,16 +287,15 @@ class DatasetMass(Dataset):
         @tf.function
         def augment_phi(data, target):
             angle = tf.random.uniform(shape=(tf.shape(data)[0],), minval=-np.pi, maxval=np.pi)
+
             data  = tf.where(phi_mask, data + angle, data)
             data = tf.where(phi_mask, tf.math.atan2(tf.sin(data), tf.cos(data)), data)
             
             return data, target
 
         new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
-        new_dataset = new_dataset.take(self.train_events)
-        augmented_dataset = new_dataset.map(augment_phi)
-
-        self.train_dataset = augmented_dataset
+        self.train_dataset  = new_dataset.map(augment_phi, num_parallel_calls=tf.data.AUTOTUNE).prefetch(tf.data.AUTOTUNE)
+        #self.train_dataset = self.train_dataset.map(augment_phi)
 
     def get_lorentz_mask(self):
         mask = []
@@ -424,8 +423,9 @@ class DatasetPt(Dataset):
         self.dev_dataset = self.dev_dataset.map(pick_pt)
 
 if __name__ == "__main__":
-    dataset = Dataset()
+    dataset = DatasetMass(file_name = "data")
     dataset.load_data()
+    dataset.augment_data_phi()
 
     print(dataset.train_events)
     print(dataset.val_events)
