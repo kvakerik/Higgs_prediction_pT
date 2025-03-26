@@ -11,4 +11,13 @@ erik_data/*
 *.db
 logs/*
 *.cpython
+*.out
+model_checkpoint/*
+data_aug/*
+venv_htt/*
+*.out
+*.err
+
+
+
 
