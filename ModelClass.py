@@ -28,6 +28,7 @@ class RegressionModel:
         self.normalizer = None
         self.model = None
         self.history = None
+        self.outFolder = "model_checkpoint"
         """
         Model hyperparameters.
         """
@@ -126,13 +127,20 @@ class RegressionModel:
         logger.info("Training model...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
-
+        
+        checkpointFolder = '{}/checkpoints/checkpoints/'.format(self.outFolder)
+        os.makedirs(checkpointFolder, exist_ok=True)
+        checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True, verbose=1, mode='min')
+        tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=1)
+        callbacks = [EpochLogger(logger), early_stop, tensorboard]
+        
         history = self.model.fit(
             self.train_batch,
             epochs=self.n_epochs,
             validation_data=self.dev_batch,
             steps_per_epoch=self.dataset.train_events // self.batch_size,
-            callbacks=[EpochLogger(logger)]
+            callbacks=callbacks
         )
         self.history = history
 
@@ -187,7 +195,8 @@ class RegressionModel:
         plt.show()
 
 
-    
+
+
 
 
 

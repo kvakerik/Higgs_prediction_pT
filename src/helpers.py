@@ -22,7 +22,7 @@ class EpochLogger(tf.keras.callbacks.Callback):
             f"Train loss: {train_loss:.4f}, MAPE: {train_mape:.2f}, MSE: {train_mse:.2f} | "
             f"Val loss: {val_loss:.4f}, MAPE: {val_mape:.2f}, MSE: {val_mse:.2f}"
         )
-        
+
 @tf.function
 def pick_only_data(data, label):
     return data

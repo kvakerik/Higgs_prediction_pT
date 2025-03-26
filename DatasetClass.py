@@ -364,7 +364,7 @@ class DatasetMass(Dataset):
 
         new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
         new_dataset = new_dataset.take(100000) #TODO self.train_events
-
+        
         augmented_dataset = new_dataset.map(augment_lorentz)
 
         #TODO Ask Dan about concatenation of new dataset to train dataset

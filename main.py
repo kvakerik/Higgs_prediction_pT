@@ -1,5 +1,5 @@
 from ModelClass import RegressionModel
-from DatasetClass import DatasetPt
+from DatasetClass import DatasetPt, DatasetMass
 import logging
 import os
 import itertools
@@ -17,21 +17,24 @@ if not logger.handlers:
 def main():
     # === Načítaj dáta ===
     erik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root"
-    logger.info(f"Loading data from: {erik_data}")
+    patrik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root"
 
-    dataset = DatasetPt(file_paths=erik_data, file_name="erik_data")
+    logger.info(f"Loading data from: {patrik_data}")
+
+    dataset = DatasetMass(file_paths=patrik_data, file_name="data")
     dataset.load_data()
     logger.info("Data loaded successfully.")
 
     # === Grid search ===
     param_grid = {
         'batch_size': [3200, 6400, 1200, 1600],
-        'learning_rate': [1e-2,1e-3, 1e-1, 1e-4],
+        'learning_rate': [1e-2,1e-3],
         'epochs': [20, 30, 40],
-        'n_layers': [2,3,4,5,6],
+        'n_layers': [2,3,4,5],
         'hidden_layer_size': [512, 1024, 1536,2048],
         'dropout_rate': [0.1,0.2, 0.3, 0.4, 0.5],
-        'weight_decay': [1e-5, 1e-4, 1e-3]
+        'weight_decay': [1e-5],
+        "n_normalizer_samples": [20, 30, 40]
     }
 
     iterable = list(itertools.product(*param_grid.values()))
@@ -39,7 +42,7 @@ def main():
     best_loss = float('inf')
 
     for i, params in enumerate(iterable):
-        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val = params
+        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val, n_normalizer_samples_val = params
 
         logger.info(f"\n{'='*80}")
         logger.info(
@@ -57,7 +60,8 @@ def main():
             n_layers=n_layers_val,
             hidden_layer_size=hidden_size_val,
             dropout_rate=dropout_val,
-            weight_decay=weight_decay_val
+            weight_decay=weight_decay_val,
+            n_normalizer_samples = n_normalizer_samples_val
         )
 
         model.prepare_dataset()
