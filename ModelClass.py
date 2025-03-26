@@ -111,7 +111,6 @@ class RegressionModel:
             decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
             alpha = 0.0
         )
-
         # Compile the model
         self.model = Model(inputs=input_layer, outputs=output_layer)
         self.model.compile(
@@ -131,8 +130,8 @@ class RegressionModel:
         checkpointFolder = '{}/checkpoints/checkpoints/'.format(self.outFolder)
         os.makedirs(checkpointFolder, exist_ok=True)
         #checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True, verbose=1, mode='min')
-        tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=1)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=False, verbose=1, mode='min')
+        tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=10)
         callbacks = [EpochLogger(logger), early_stop, tensorboard]
         
         history = self.model.fit(

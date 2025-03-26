@@ -27,14 +27,14 @@ def main():
 
     # === Grid search ===
     param_grid = {
-        'batch_size': [3000, 2500],
+        'batch_size': [3000, 2500, 1500],
         'learning_rate': [3e-3, 6e-3],
-        'epochs': [30, 40],
+        'epochs': [100],
         'n_layers': [2,3,4],
-        'hidden_layer_size': [1024, 1536],
-        'dropout_rate': [0.2, 0.3],
+        'hidden_layer_size': [1024, 512, 256],
+        'dropout_rate': [0.2],
         'weight_decay': [1e-5],
-        "n_normalizer_samples": [20, 30, 40]
+        "n_normalizer_samples": [20]
     }
 
     iterable = list(itertools.product(*param_grid.values()))
