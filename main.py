@@ -27,12 +27,12 @@ def main():
 
     # === Grid search ===
     param_grid = {
-        'batch_size': [3200, 6400, 1200, 1600],
-        'learning_rate': [1e-2,1e-3],
-        'epochs': [20, 30, 40],
-        'n_layers': [2,3,4,5],
-        'hidden_layer_size': [512, 1024, 1536,2048],
-        'dropout_rate': [0.1,0.2, 0.3, 0.4, 0.5],
+        'batch_size': [3000, 2500],
+        'learning_rate': [3e-3, 6e-3],
+        'epochs': [30, 40],
+        'n_layers': [2,3,4],
+        'hidden_layer_size': [1024, 1536],
+        'dropout_rate': [0.2, 0.3],
         'weight_decay': [1e-5],
         "n_normalizer_samples": [20, 30, 40]
     }
