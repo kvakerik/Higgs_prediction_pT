@@ -9,3 +9,15 @@ data_test/*
 test_data/*
 erik_data/*
 *.db
+logs/*
+*.cpython
+*.out
+model_checkpoint/*
+data_aug/*
+venv_htt/*
+*.out
+*.err
+
+
+
+

@@ -38,7 +38,6 @@ class Dataset():
             self.variables_higgs.append(self.target_variable)
 
         self.train_fraction = kwargs.get('train_fraction', 0.8)
-        self.file_name = kwargs.get('file_name', "data")
         self.file_paths = kwargs.get('file_paths', "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root")
         self.val_dataset = None
         self.train_dataset = None
@@ -211,29 +210,29 @@ class Dataset():
         self.train_events = train_events
         self.dev_events = dev_events
     
-    #TODO: add save and load data for dev dataset
-    def save_data(self):  
+    def save_data(self, file_name= "data"):  
         print("saving dataset")
-        os.makedirs(f"{self.file_name}", exist_ok=True)  # Ensure 'data' directory exists
+        os.makedirs(f"{file_name}", exist_ok=True)  # Ensure 'data' directory exists
         val_dataset = self.val_dataset
         train_dataset = self.train_dataset
         dev_dataset = self.dev_dataset
-        val_dataset.save(f"{self.file_name}/val_dataset")
-        train_dataset.save(f"{self.file_name}/train_dataset")
-        dev_dataset.save(f"{self.file_name}/dev_dataset")
 
-        output_file = f"{self.file_name}/event_counts.txt"
+        val_dataset.save(f"{file_name}/val_dataset")
+        train_dataset.save(f"{file_name}/train_dataset")
+        dev_dataset.save(f"{file_name}/dev_dataset")
+
+        output_file = f"{file_name}/event_counts.txt"
         with open(output_file, "w") as f:
             f.write(f"{self.train_events}\n")
             f.write(f"{self.val_events}\n")
             f.write(f"{self.dev_events}\n")
         print(f"Dataset Successfully saved")
 
-    def load_data(self):
-        self.train_dataset = tf.data.Dataset.load(f"{self.file_name}/train_dataset")
-        self.val_dataset = tf.data.Dataset.load(f"{self.file_name}/val_dataset")
-        self.dev_dataset = tf.data.Dataset.load(f"{self.file_name}/dev_dataset")
-        with open(f"{self.file_name}/event_counts.txt", "r") as f:
+    def load_data(self, file_name = "data"):
+        self.train_dataset = tf.data.Dataset.load(f"{file_name}/train_dataset")
+        self.val_dataset = tf.data.Dataset.load(f"{file_name}/val_dataset")
+        self.dev_dataset = tf.data.Dataset.load(f"{file_name}/dev_dataset")
+        with open(f"{file_name}/event_counts.txt", "r") as f:
             self.train_events, self.val_events, self.dev_events = map(int, f.readlines())
 
     def plot_distribution(self):
@@ -258,7 +257,7 @@ class DatasetMass(Dataset):
     def make_slices(self, n_slices=10):
         bins = np.linspace(70.0, 130.0, num=n_slices+1)
         functions = [make_filter_slice(lb, ub) for lb, ub in zip(bins[:-1], bins[1:])]
-        self.slices = [self.train_dataset.filter(fn) for fn in functions]
+        self.slices = [self.slice_datasets[i].filter(functions[i]) for i in range(n_slices)]
 
     def get_phi_mask(self):
         mask = []
@@ -285,26 +284,16 @@ class DatasetMass(Dataset):
 
         @tf.function
         def augment_phi(data, target):
-            # generate random rotation angle
             angle = tf.random.uniform(shape=(tf.shape(data)[0],), minval=-np.pi, maxval=np.pi)
-            #tf.print("angle: ", angle.shape)
-            #tf.print("data: ", data.shape)
-            # apply rotation
+
             data  = tf.where(phi_mask, data + angle, data)
-            
-            # normalize angles between -pi and pi
             data = tf.where(phi_mask, tf.math.atan2(tf.sin(data), tf.cos(data)), data)
             
             return data, target
 
-        # sample from the slices
-        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
-        new_dataset = new_dataset.take(100000) #TODO self.train_events
-
-        # apply augmentation
-        augmented_dataset = new_dataset.map(augment_phi)
-        #TODO Ask Dan about concatenation of new dataset to train dataset 
-        self.train_dataset = augmented_dataset
+        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
+        self.train_dataset  = new_dataset.map(augment_phi, num_parallel_calls=tf.data.AUTOTUNE).prefetch(tf.data.AUTOTUNE)
+        #self.train_dataset = self.train_dataset.map(augment_phi)
 
     def get_lorentz_mask(self):
         mask = []
@@ -373,15 +362,18 @@ class DatasetMass(Dataset):
 
         new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
         new_dataset = new_dataset.take(100000) #TODO self.train_events
-
         augmented_dataset = new_dataset.map(augment_lorentz)
 
         #TODO Ask Dan about concatenation of new dataset to train dataset
         self.train_dataset = augmented_dataset
+        self.train_events = 100000
 
-    def load_data(self):
-        super().load_data()
-
+    def load_data(self, file_name = "data", n_slices=10):
+        self.slice_datasets = [] 
+        for _ in range(n_slices):
+            super().load_data(file_name = "data")
+            self.slice_datasets.append(self.train_dataset)
+        
         ## add augmentation
         ## pick mass
         @tf.function
@@ -391,7 +383,6 @@ class DatasetMass(Dataset):
         self.train_dataset = self.train_dataset.map(pick_mass)
         self.val_dataset = self.val_dataset.map(pick_mass)
         self.dev_dataset = self.dev_dataset.map(pick_mass)
-
 
 class DatasetPt(Dataset):
     def __init__(self, **kwargs): 
@@ -417,7 +408,7 @@ class DatasetPt(Dataset):
         return mask
 
     def load_data(self):
-        super().load_data()
+        super().load_data(file_name = "data")
 
         ## add augmentation
         
@@ -431,8 +422,9 @@ class DatasetPt(Dataset):
         self.dev_dataset = self.dev_dataset.map(pick_pt)
 
 if __name__ == "__main__":
-    dataset = Dataset()
-    dataset.load_data()
+    dataset = DatasetMass()
+    dataset.load_data(file_name = "data")
+    dataset.augment_data_phi()
 
     print(dataset.train_events)
     print(dataset.val_events)

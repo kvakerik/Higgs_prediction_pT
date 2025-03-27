@@ -1,5 +1,5 @@
 from ModelClass import RegressionModel
-from DatasetClass import DatasetPt
+from DatasetClass import DatasetPt, DatasetMass
 import logging
 import os
 import itertools
@@ -17,21 +17,24 @@ if not logger.handlers:
 def main():
     # === Načítaj dáta ===
     erik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root"
-    logger.info(f"Loading data from: {erik_data}")
+    patrik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root"
 
-    dataset = DatasetPt(file_paths=erik_data, file_name="erik_data")
+    logger.info(f"Loading data from: {patrik_data}")
+
+    dataset = DatasetMass(file_paths=patrik_data, file_name="data")
     dataset.load_data()
     logger.info("Data loaded successfully.")
 
     # === Grid search ===
     param_grid = {
-        'batch_size': [3200, 6400],
-        'learning_rate': [0.01, 0.1],
-        'epochs': [20, 30],
-        'n_layers': [4, 6],
-        'hidden_layer_size': [1024, 2048],
-        'dropout_rate': [0.1, 0.5],
-        'weight_decay': [1e-5, 1e-3]
+        'batch_size': [3000, 2500, 1500],
+        'learning_rate': [3e-3, 6e-3],
+        'epochs': [100],
+        'n_layers': [2,3,4],
+        'hidden_layer_size': [1024, 512, 256],
+        'dropout_rate': [0.2],
+        'weight_decay': [1e-5],
+        "n_normalizer_samples": [20]
     }
 
     iterable = list(itertools.product(*param_grid.values()))
@@ -39,11 +42,11 @@ def main():
     best_loss = float('inf')
 
     for i, params in enumerate(iterable):
-        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val = params
+        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val, n_normalizer_samples_val = params
 
         logger.info(f"\n{'='*80}")
         logger.info(
-            f"[{i+1}/{len(iterable)}] Trénujeme s hyperparametrami:\n"
+            f"[{i+1}/{len(iterable)}] Training with hyperparameters:\n"
             f"  batch_size={batch_size_val}, learning_rate={learning_rate_val}, epochs={epochs_val},\n"
             f"  n_layers={n_layers_val}, hidden_layer_size={hidden_size_val},\n"
             f"  dropout_rate={dropout_val}, weight_decay={weight_decay_val}"
@@ -57,7 +60,8 @@ def main():
             n_layers=n_layers_val,
             hidden_layer_size=hidden_size_val,
             dropout_rate=dropout_val,
-            weight_decay=weight_decay_val
+            weight_decay=weight_decay_val,
+            n_normalizer_samples = n_normalizer_samples_val
         )
 
         model.prepare_dataset()
@@ -66,23 +70,23 @@ def main():
         model.train_model()
         model.plot_history()
 
-        final_loss = model.history.history['loss'][-1]
-        logger.info(f"Final training loss: {final_loss:.6f}")
+        final_loss = model.history.history['val_mean_squared_error'][-1]
+        logger.info(f"Final validation MSE: {final_loss:.6f}")
 
         if final_loss < best_loss:
             best_loss = final_loss
             best_params = params
 
-    logger.info("\n=== Najlepšie hyperparametre ===")
+    logger.info("\n=== Best hyperparameters ===")
     logger.info(
         f"batch_size={best_params[0]}, learning_rate={best_params[1]}, epochs={best_params[2]},\n"
         f"n_layers={best_params[3]}, hidden_layer_size={best_params[4]},\n"
         f"dropout_rate={best_params[5]}, weight_decay={best_params[6]}"
     )
-    logger.info(f"Najnižšia dosažená tréningová loss: {best_loss:.6f}")
+    logger.info(f"Lowest achieved validation MSE: {best_loss:.6f}")
 
     # Finálne echo do job.out
-    print("Tréning dokončený detailné logy nájdeš v logs/train.log")
+    print("Training completed. Detailed logs can be found in logs/train.log")
 
 if __name__ == "__main__":
     main()

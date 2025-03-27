@@ -28,6 +28,7 @@ class RegressionModel:
         self.normalizer = None
         self.model = None
         self.history = None
+        self.outFolder = "model_checkpoint"
         """
         Model hyperparameters.
         """
@@ -93,6 +94,7 @@ class RegressionModel:
         """
         print("Building model...")
         input_layer = Input(shape=tuple(self.dataset.train_dataset.element_spec[0].shape.as_list()))
+
         layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
@@ -109,7 +111,6 @@ class RegressionModel:
             decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
             alpha = 0.0
         )
-
         # Compile the model
         self.model = Model(inputs=input_layer, outputs=output_layer)
         self.model.compile(
@@ -125,12 +126,20 @@ class RegressionModel:
         logger.info("Training model...")
         if not self.model:
             raise ValueError("Model has not been built yet. Call build_model() first.")
-
+        
+        checkpointFolder = '{}/checkpoints/checkpoints/'.format(self.outFolder)
+        os.makedirs(checkpointFolder, exist_ok=True)
+        #checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_mean_squared_error', patience=10, restore_best_weights=False, verbose=1, mode='min')
+        tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=10)
+        callbacks = [EpochLogger(logger), early_stop, tensorboard]
+        
         history = self.model.fit(
             self.train_batch,
             epochs=self.n_epochs,
             validation_data=self.dev_batch,
-            callbacks=[EpochLogger(logger)]
+            steps_per_epoch=self.dataset.train_events // self.batch_size,
+            callbacks=callbacks
         )
         self.history = history
 
@@ -184,11 +193,9 @@ class RegressionModel:
         plt.title("Output Distribution")
         plt.show()
 
-if __name__ == "__main__":
-    dataset = Dataset()
-    dataset.load_data()
-    print(len(dataset.train_dataset))
-    
+
+
+
 
 
 
