@@ -130,7 +130,7 @@ class RegressionModel:
         checkpointFolder = '{}/checkpoints/checkpoints/'.format(self.outFolder)
         os.makedirs(checkpointFolder, exist_ok=True)
         #checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
-        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=False, verbose=1, mode='min')
+        early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_mean_squared_error', patience=10, restore_best_weights=False, verbose=1, mode='min')
         tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=10)
         callbacks = [EpochLogger(logger), early_stop, tensorboard]
         
