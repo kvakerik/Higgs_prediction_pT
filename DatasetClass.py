@@ -13,7 +13,7 @@ os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 tf.get_logger().setLevel('ERROR')
 gpus = tf.config.list_physical_devices('GPU')
-# print("Available GPUs:", gpus)
+print("Available GPUs:", gpus)
 
 #path_sig = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*VBFH*.root"
 #path_bkg = "/scratch/ucjf-atlas/njsf164/data_higgs_root/*Ztt*.root"
@@ -162,10 +162,6 @@ class Dataset():
         val_size_dataset = []
         dev_size_dataset = []
 
-        dev_size_dataset = []
-
-
-        #TODO debug train test split 
         for dataset, dataset_size in zip(datasets, n_events):
             # Determine datasets split sizes
             train_size = int(round(self.train_fraction * dataset_size))
@@ -176,8 +172,8 @@ class Dataset():
             if val_size > 0 and train_size > 0 and dev_size > 0:
                 # Split datasets into train and validation data
                 train_dataset = dataset.take(train_size)
-                val_dataset = dataset.skip(train_size)
-                dev_dataset = dataset.skip(train_size + val_size)
+                val_dataset = dataset.skip(train_size).take(val_size)
+                dev_dataset = dataset.skip(train_size + val_size).take(dev_size)
 
                 train_datasets.append(train_dataset)
                 val_datasets.append(val_dataset)
@@ -202,22 +198,14 @@ class Dataset():
 
         print("Dataset Successfully weighted")
         
-        dev_events = sum(dev_size_dataset)
-        
-        weights_list_train = [size / train_events for size in train_size_dataset]
-        weights_list_val = [size / val_events for size in val_size_dataset]
-        weights_list_dev = [size / dev_events for size in dev_size_dataset]
-
-        print("Dataset Successfully weighted")
-        
         if len(val_datasets) > 0:
-            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val, seed=42)
+            self.val_dataset = tf.data.Dataset.sample_from_datasets(val_datasets, weights=weights_list_val)
 
         if len(train_datasets) > 0:
-            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train, seed=42)
+            self.train_dataset = tf.data.Dataset.sample_from_datasets(train_datasets, weights=weights_list_train)
 
         if len(dev_datasets) > 0:
-            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev, seed=42)
+            self.dev_dataset = tf.data.Dataset.sample_from_datasets(dev_datasets, weights=weights_list_dev)
 
         self.val_events = val_events
         self.train_events = train_events
@@ -311,7 +299,7 @@ class DatasetMass(Dataset):
 
         # sample from the slices
         new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
-        new_dataset = new_dataset.take(self.train_events)
+        new_dataset = new_dataset.take(100000) #TODO self.train_events
 
         # apply augmentation
         augmented_dataset = new_dataset.map(augment_phi)
@@ -383,8 +371,9 @@ class DatasetMass(Dataset):
                 
             return data, target
 
-        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices), seed=42)
-        new_dataset = new_dataset.take(self.train_events)
+        new_dataset = tf.data.Dataset.sample_from_datasets([s.repeat() for s in self.slices], weights=[1.]*len(self.slices))
+        new_dataset = new_dataset.take(100000) #TODO self.train_events
+
         augmented_dataset = new_dataset.map(augment_lorentz)
 
         #TODO Ask Dan about concatenation of new dataset to train dataset
