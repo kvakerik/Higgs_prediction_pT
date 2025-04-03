@@ -1,23 +1,23 @@
+venv/
+venv_htt
 
-venv/*
-__pycache__/*
-data/*
-*.pdf
-*.pth
+__pycache__/
 *.pyc
-data_test/*
-test_data/*
-erik_data/*
-*.db
-logs/*
 *.cpython
-*.out
-model_checkpoint/*
-data_aug/*
-venv_htt/*
+
+logs/
 *.out
 *.err
 
+data/
+data_test/
+test_data/
+erik_data/
+data_aug/
 
+*.pdf
+*.pth
+*.db
+model_checkpoint/
 
-
+submit.sh

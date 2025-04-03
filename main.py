@@ -19,22 +19,23 @@ def main():
     erik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root"
     patrik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root"
 
-    logger.info(f"Loading data from: {patrik_data}")
+    logger.info(f"Loading data from: {erik_data}")
 
-    dataset = DatasetMass(file_paths=patrik_data, file_name="data")
+    dataset = DatasetPt(file_paths=erik_data, file_name="erik_data")
     dataset.load_data()
     logger.info("Data loaded successfully.")
 
     # === Grid search ===
     param_grid = {
-        'batch_size': [3000, 2500, 1500],
-        'learning_rate': [3e-3, 6e-3],
+        'batch_size': [512,2000],
+        'learning_rate': [1e-3],
         'epochs': [100],
-        'n_layers': [2,3,4],
-        'hidden_layer_size': [1024, 512, 256],
+        'n_layers': [2],
+        'hidden_layer_size': [512,1024],
         'dropout_rate': [0.2],
         'weight_decay': [1e-5],
-        "n_normalizer_samples": [20]
+        "n_normalizer_samples": [50000],
+        "optimizer": ["adamw"]
     }
 
     iterable = list(itertools.product(*param_grid.values()))
@@ -42,14 +43,15 @@ def main():
     best_loss = float('inf')
 
     for i, params in enumerate(iterable):
-        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val, n_normalizer_samples_val = params
+        batch_size_val, learning_rate_val, epochs_val, n_layers_val, hidden_size_val, dropout_val, weight_decay_val, n_normalizer_samples_val, adamw_val = params
 
         logger.info(f"\n{'='*80}")
         logger.info(
             f"[{i+1}/{len(iterable)}] Training with hyperparameters:\n"
             f"  batch_size={batch_size_val}, learning_rate={learning_rate_val}, epochs={epochs_val},\n"
             f"  n_layers={n_layers_val}, hidden_layer_size={hidden_size_val},\n"
-            f"  dropout_rate={dropout_val}, weight_decay={weight_decay_val}"
+            f"  dropout_rate={dropout_val}, weight_decay={weight_decay_val},\n"
+            f"  n_normalizer_samples={n_normalizer_samples_val}, optimizer={adamw_val}"
         )
 
         model = RegressionModel(
@@ -61,7 +63,8 @@ def main():
             hidden_layer_size=hidden_size_val,
             dropout_rate=dropout_val,
             weight_decay=weight_decay_val,
-            n_normalizer_samples = n_normalizer_samples_val
+            n_normalizer_samples = n_normalizer_samples_val,
+            optimizer=adamw_val,
         )
 
         model.prepare_dataset()
@@ -81,7 +84,8 @@ def main():
     logger.info(
         f"batch_size={best_params[0]}, learning_rate={best_params[1]}, epochs={best_params[2]},\n"
         f"n_layers={best_params[3]}, hidden_layer_size={best_params[4]},\n"
-        f"dropout_rate={best_params[5]}, weight_decay={best_params[6]}"
+        f"dropout_rate={best_params[5]}, weight_decay={best_params[6]},\n"
+        f"n_normalizer_samples={best_params[7]}, optimizer={best_params[8]}"
     )
     logger.info(f"Lowest achieved validation MSE: {best_loss:.6f}")
 

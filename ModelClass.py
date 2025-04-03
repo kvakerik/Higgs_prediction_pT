@@ -5,6 +5,7 @@ import os
 from DatasetClass import Dataset
 from tensorflow.keras.layers import Normalization, Input, Dense, BatchNormalization, Dropout, Activation
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import AdamW
 from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.losses import MeanSquaredError, MeanAbsolutePercentageError
@@ -42,6 +43,7 @@ class RegressionModel:
         self.n_normalizer_samples = kwargs.get('n_normalizer_samples', 20)
         self.weight_decay = kwargs.get('weight_decay', 1e-5)
         self.dropout_rate = kwargs.get('dropout_rate', 0.2)
+        self.optimizer_name = kwargs.get('optimizer', 'adam')
     
     def save(self):
         if self.model is None:
@@ -111,10 +113,17 @@ class RegressionModel:
             decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
             alpha = 0.0
         )
+        
+        # Choose optimizer
+        if self.optimizer_name.lower() == 'adamw':
+            optimizer = AdamW(learning_rate=learning_rate, weight_decay=self.weight_decay)
+        else:
+            optimizer = Adam(learning_rate=learning_rate)
+
         # Compile the model
         self.model = Model(inputs=input_layer, outputs=output_layer)
         self.model.compile(
-            optimizer=Adam(learning_rate=learning_rate, weight_decay=self.weight_decay),
+            optimizer=optimizer,
             loss=MeanSquaredError(),
             metrics=[MeanSquaredError(), MeanAbsolutePercentageError()]
         )
@@ -132,13 +141,14 @@ class RegressionModel:
         #checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
         early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_mean_squared_error', patience=10, restore_best_weights=False, verbose=1, mode='min')
         tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=10)
+
         callbacks = [EpochLogger(logger), early_stop, tensorboard]
         
         history = self.model.fit(
             self.train_batch,
             epochs=self.n_epochs,
             validation_data=self.dev_batch,
-            steps_per_epoch=self.dataset.train_events // self.batch_size,
+            # steps_per_epoch=self.dataset.train_events // self.batch_size,
             callbacks=callbacks
         )
         self.history = history

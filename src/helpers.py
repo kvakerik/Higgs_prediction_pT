@@ -17,11 +17,24 @@ class EpochLogger(tf.keras.callbacks.Callback):
         train_mse = logs.get("mean_squared_error", 0.0)
         val_mse = logs.get("val_mean_squared_error", 0.0)
 
+        # Získaj learning rate cez .learning_rate
+        try:
+            lr = self.model.optimizer.learning_rate
+            if hasattr(lr, '__call__'):
+                # ak je lr scheduler, napr. CosineDecay
+                lr = lr(self.model.optimizer.iterations).numpy()
+            else:
+                lr = tf.keras.backend.get_value(lr)
+        except Exception:
+            lr = float("nan")
+
         self.logger.info(
             f"[Epoch {epoch + 1}] "
+            f"LR: {lr:.6e} | "
             f"Train loss: {train_loss:.4f}, MAPE: {train_mape:.2f}, MSE: {train_mse:.2f} | "
             f"Val loss: {val_loss:.4f}, MAPE: {val_mape:.2f}, MSE: {val_mse:.2f}"
         )
+
 
 @tf.function
 def pick_only_data(data, label):
