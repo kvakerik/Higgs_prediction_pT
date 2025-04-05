@@ -9,11 +9,12 @@ logs/
 *.out
 *.err
 
-data/
+data
 data_test/
 test_data/
 erik_data/
 data_aug/
+models/
 
 *.pdf
 *.pth

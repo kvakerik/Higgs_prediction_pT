@@ -27,7 +27,7 @@ class Dataset():
                     "jet_1_p4",
                     "dijet_p4",
                     "met_p4", 
-                    "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus", 
+                    "n_jets","n_jets_30","n_jets_40","n_electrons","n_muons","n_taus","ditau_mmc_mlm_m"
                     ]
         
         default_target_variable = "truth_boson_p4"

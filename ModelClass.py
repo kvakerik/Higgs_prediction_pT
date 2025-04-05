@@ -23,6 +23,35 @@ if not logger.handlers:
     file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
     logger.addHandler(file_handler)
 
+
+class ResidualBlock(tf.keras.layers.Layer):
+    def __init__(self, units, activation="relu", dropout_rate=0.2, use_bias=False, **kwargs):
+        super(ResidualBlock, self).__init__(**kwargs)
+        self.units = units
+        self.activation = activation
+        self.dropout_rate = dropout_rate
+        self.use_bias = use_bias
+
+    def build(self, input_shape):
+        # Main path layers
+        self.dense1 = Dense(self.units, use_bias=self.use_bias)
+        self.bn1 = BatchNormalization()
+        self.activation_layer = Activation(self.activation)
+        self.dropout = Dropout(self.dropout_rate)
+        self.dense2 = Dense(input_shape[-1], use_bias=self.use_bias)
+        self.bn2 = BatchNormalization()
+
+    def call(self, inputs):
+        # Main path
+        x = self.dense1(inputs)
+        x = self.bn1(x)
+        x = self.activation_layer(x)
+        x = self.dropout(x)
+        x = self.dense2(x)
+        x = self.bn2(x)
+        
+        return x + inputs    
+
 class RegressionModel:
     def __init__(self, dataset, **kwargs):
         self.dataset = dataset
@@ -55,14 +84,14 @@ class RegressionModel:
         if not os.path.exists(models_dir):
             os.makedirs(models_dir)
 
-        model_save_path = os.path.join(models_dir, "mlp_regression_model")
+        model_save_path = os.path.join(models_dir, "mlp_regression_model.keras")
         self.model.save(model_save_path)
         print(f"Model saved to {model_save_path}")
 
     def load(self):
         current_dir = os.getcwd()
         models_dir = os.path.join(current_dir, "models")
-        model_load_path = os.path.join(models_dir, "mlp_regression_model")
+        model_load_path = os.path.join(models_dir, "mlp_regression_model.keras")
 
         if os.path.exists(model_load_path):
             self.model = load_model(model_load_path)
@@ -100,10 +129,12 @@ class RegressionModel:
         layer = self.normalizer(input_layer)
 
         for i in range(self.n_layers):
-            layer = Dense(self.hidden_layer_size // self.n_layers, use_bias=False)(layer) 
-            layer = BatchNormalization()(layer) 
-            layer = Activation(self.activation_function)(layer) 
-            layer = Dropout(self.dropout_rate)(layer) 
+            layer = ResidualBlock(
+                units=self.hidden_layer_size // self.n_layers,
+                activation=self.activation_function,
+                dropout_rate=self.dropout_rate,
+                use_bias=False 
+            )(layer)
 
         output_layer = Dense(1, activation=None)(layer)
 
@@ -111,12 +142,12 @@ class RegressionModel:
         learning_rate = CosineDecay(
             initial_learning_rate = self.initial_learning_rate,
             decay_steps = self.n_epochs * self.dataset.train_events // self.batch_size,
-            alpha = 0.0
+            alpha = 1e-5
         )
         
         # Choose optimizer
         if self.optimizer_name.lower() == 'adamw':
-            optimizer = AdamW(learning_rate=learning_rate, weight_decay=self.weight_decay)
+            optimizer = AdamW(learning_rate=learning_rate, weight_decay=self.weight_decay,clipnorm=1.0)
         else:
             optimizer = Adam(learning_rate=learning_rate)
 
@@ -138,16 +169,16 @@ class RegressionModel:
         
         checkpointFolder = '{}/checkpoints/checkpoints/'.format(self.outFolder)
         os.makedirs(checkpointFolder, exist_ok=True)
-        #checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
+        checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
         early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_mean_squared_error', patience=10, restore_best_weights=False, verbose=1, mode='min')
         tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=10)
 
-        callbacks = [EpochLogger(logger), early_stop, tensorboard]
+        callbacks = [EpochLogger(logger), early_stop, tensorboard, checkpoint] 
         
         history = self.model.fit(
             self.train_batch,
             epochs=self.n_epochs,
-            validation_data=self.dev_batch,
+            validation_data=self.val_batch,
             # steps_per_epoch=self.dataset.train_events // self.batch_size,
             callbacks=callbacks
         )
@@ -202,6 +233,10 @@ class RegressionModel:
         plt.legend()
         plt.title("Output Distribution")
         plt.show()
+        plt.savefig("output_distribution.png")
+
+
+    
 
 
 

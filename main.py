@@ -3,6 +3,9 @@ from DatasetClass import DatasetPt, DatasetMass
 import logging
 import os
 import itertools
+import matplotlib.pyplot as plt
+from src.helpers import extract_data
+import numpy as np
 
 # === Nastav logger: iba do súboru, nič do stdout ===
 logger = logging.getLogger("training_logger")
@@ -27,15 +30,15 @@ def main():
 
     # === Grid search ===
     param_grid = {
-        'batch_size': [512,2000],
-        'learning_rate': [1e-3],
-        'epochs': [100],
-        'n_layers': [2],
-        'hidden_layer_size': [512,1024],
-        'dropout_rate': [0.2],
-        'weight_decay': [1e-5],
-        "n_normalizer_samples": [50000],
-        "optimizer": ["adamw"]
+        'batch_size': [3000],               # obrovský batch, nech sa spraví 1 krok
+        'learning_rate': [1e-3],             # veľké učenie – rýchla konvergencia (aj keď nie stabilná)
+        'epochs': [300],                       # len 1 prechod
+        'n_layers': [4],                     # minimum vrstiev
+        'hidden_layer_size': [4096],           # čo najmenšia architektúra
+        'dropout_rate': [0.2],              # vypnúť dropout – rýchlejšie výpočty
+        'weight_decay': [1e-05],              # vypnúť reguláciu
+        "n_normalizer_samples": [10000],      # adaptuj normalizátor len na pár vzoriek
+        "optimizer": ["adamw"]               # pokojne použi jednoduchší optimizer (adam)
     }
 
     iterable = list(itertools.product(*param_grid.values()))
@@ -72,6 +75,9 @@ def main():
         model.build_model()
         model.train_model()
         model.plot_history()
+        model.save()
+        model.load()
+
 
         final_loss = model.history.history['val_mean_squared_error'][-1]
         logger.info(f"Final validation MSE: {final_loss:.6f}")
@@ -88,6 +94,22 @@ def main():
         f"n_normalizer_samples={best_params[7]}, optimizer={best_params[8]}"
     )
     logger.info(f"Lowest achieved validation MSE: {best_loss:.6f}")
+
+
+    
+    y_pred = model.model.predict(model.val_batch)
+    y_true = np.array(extract_data(dataset.val_dataset.map(lambda x, y: y))).flatten()
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(y_true, bins=100, histtype='step', label='True Values', density=True)
+    plt.hist(y_pred.flatten(), bins=100, histtype='step', label='Predicted Values', density=True)
+    plt.xlabel("Output")
+    plt.ylabel("Density")
+    plt.title("Predicted vs True Distribution on Validation Set")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("predicted_vs_true_distribution.png", dpi=300)
+
 
     # Finálne echo do job.out
     print("Training completed. Detailed logs can be found in logs/train.log")

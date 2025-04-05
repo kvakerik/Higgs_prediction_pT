@@ -62,7 +62,7 @@ def main():
     logger.info("Loading dataset")
     erik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root"
     patrik_data = "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root"
-    dataset = DatasetPt()
+    dataset = DatasetPt(file_paths=erik_data)
     dataset.load_data()
     logger.info("Dataset loaded successfully.")
     print("Train dataset size:", len(dataset.train_dataset))
