@@ -24,21 +24,21 @@ def main():
 
     logger.info(f"Loading data from: {erik_data}")
 
-    dataset = DatasetPt(file_paths=erik_data, file_name="erik_data")
+    dataset = DatasetPt(file_paths=erik_data)
     dataset.load_data()
     logger.info("Data loaded successfully.")
 
     # === Grid search ===
     param_grid = {
-        'batch_size': [3000],               # obrovský batch, nech sa spraví 1 krok
-        'learning_rate': [1e-3],             # veľké učenie – rýchla konvergencia (aj keď nie stabilná)
-        'epochs': [300],                       # len 1 prechod
-        'n_layers': [4],                     # minimum vrstiev
-        'hidden_layer_size': [4096],           # čo najmenšia architektúra
-        'dropout_rate': [0.2],              # vypnúť dropout – rýchlejšie výpočty
-        'weight_decay': [1e-05],              # vypnúť reguláciu
-        "n_normalizer_samples": [10000],      # adaptuj normalizátor len na pár vzoriek
-        "optimizer": ["adamw"]               # pokojne použi jednoduchší optimizer (adam)
+        'batch_size': [3000],               
+        'learning_rate': [1e-3],             
+        'epochs': [200],                     
+        'n_layers': [4],                    
+        'hidden_layer_size': [4096],     
+        'dropout_rate': [0],            
+        'weight_decay': [0],            
+        "n_normalizer_samples": [10000],      
+        "optimizer": ["adamw"]               
     }
 
     iterable = list(itertools.product(*param_grid.values()))
@@ -76,7 +76,7 @@ def main():
         model.train_model()
         model.plot_history()
         model.save()
-        model.load()
+        # model.load(model_save_path="model_mmc.keras")
 
 
         final_loss = model.history.history['val_mean_squared_error'][-1]
@@ -108,7 +108,7 @@ def main():
     plt.title("Predicted vs True Distribution on Validation Set")
     plt.legend()
     plt.grid(True)
-    plt.savefig("predicted_vs_true_distribution.png", dpi=300)
+    plt.savefig("predicted_vs_true_distribution_mmc.png", dpi=300)
 
 
     # Finálne echo do job.out

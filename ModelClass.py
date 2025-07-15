@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import datetime
 from DatasetClass import Dataset
 from tensorflow.keras.layers import Normalization, Input, Dense, BatchNormalization, Dropout, Activation
 from tensorflow.keras.optimizers import Adam
@@ -84,14 +85,14 @@ class RegressionModel:
         if not os.path.exists(models_dir):
             os.makedirs(models_dir)
 
-        model_save_path = os.path.join(models_dir, "mlp_regression_model.keras")
+        model_save_path = os.path.join(models_dir, "PtNet_mmc.keras")
         self.model.save(model_save_path)
         print(f"Model saved to {model_save_path}")
 
     def load(self):
         current_dir = os.getcwd()
         models_dir = os.path.join(current_dir, "models")
-        model_load_path = os.path.join(models_dir, "mlp_regression_model.keras")
+        model_load_path = os.path.join(models_dir, "PtNet_mmc.keras")
 
         if os.path.exists(model_load_path):
             self.model = load_model(model_load_path)
@@ -169,11 +170,12 @@ class RegressionModel:
         
         checkpointFolder = '{}/checkpoints/checkpoints/'.format(self.outFolder)
         os.makedirs(checkpointFolder, exist_ok=True)
-        checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
+        # checkpoint = tf.keras.callbacks.BackupAndRestore(backup_dir=checkpointFolder, delete_checkpoint=False, save_freq=100)
         early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_mean_squared_error', patience=10, restore_best_weights=False, verbose=1, mode='min')
-        tensorboard = tf.keras.callbacks.TensorBoard(log_dir='{}/logs'.format(self.outFolder), histogram_freq=10)
+        log_dir = os.path.join(self.outFolder, "logs", "train", datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+        tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=10)
 
-        callbacks = [EpochLogger(logger), early_stop, tensorboard, checkpoint] 
+        callbacks = [EpochLogger(logger), tensorboard] 
         
         history = self.model.fit(
             self.train_batch,
@@ -214,6 +216,8 @@ class RegressionModel:
         plt.ylabel('Loss')
         plt.legend()
         plt.title("Training and Validation Loss")
+        plt.show()
+        plt.savefig("training_loss.png")
 
     def plot_output_distributions(self):
         """

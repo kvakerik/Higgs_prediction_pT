@@ -40,6 +40,10 @@ class EpochLogger(tf.keras.callbacks.Callback):
 def pick_only_data(data, label):
     return data
 
+@tf.function
+def pick_only_target(data, target):
+    return target
+
 def extract_data(dataset):
     # Extract all elements from the tf.data.Dataset
     return [x.numpy() for x in dataset]

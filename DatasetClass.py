@@ -38,7 +38,7 @@ class Dataset():
             self.variables_higgs.append(self.target_variable)
 
         self.train_fraction = kwargs.get('train_fraction', 0.8)
-        self.file_paths = kwargs.get('file_paths', "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*Ztt*.root")
+        self.file_paths = kwargs.get('file_paths', "/scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root")
         self.val_dataset = None
         self.train_dataset = None
         self.val_events = None
@@ -49,7 +49,7 @@ class Dataset():
         self.load_data()
 
     def importFiles(self): 
-        print("Importing Root files")
+        print("Importing Root files",self.file_paths)
         files = glob.glob(self.file_paths)
         self.files = files
 
@@ -210,7 +210,7 @@ class Dataset():
         self.train_events = train_events
         self.dev_events = dev_events
     
-    def save_data(self, file_name= "data"):  
+    def save_data(self, file_name= "data_mmc"):  
         print("saving dataset")
         os.makedirs(f"{file_name}", exist_ok=True)  # Ensure 'data' directory exists
         val_dataset = self.val_dataset
@@ -228,7 +228,7 @@ class Dataset():
             f.write(f"{self.dev_events}\n")
         print(f"Dataset Successfully saved")
 
-    def load_data(self, file_name = "data"):
+    def load_data(self, file_name = "data_mmc"):
         self.train_dataset = tf.data.Dataset.load(f"{file_name}/train_dataset")
         self.val_dataset = tf.data.Dataset.load(f"{file_name}/val_dataset")
         self.dev_dataset = tf.data.Dataset.load(f"{file_name}/dev_dataset")
@@ -408,7 +408,7 @@ class DatasetPt(Dataset):
         return mask
 
     def load_data(self):
-        super().load_data(file_name = "data")
+        super().load_data(file_name = "data_mmc")
 
         ## add augmentation
         
