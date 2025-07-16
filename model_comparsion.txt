@@ -1,0 +1,327 @@
+2025-04-19 18:55:46,456 - INFO - [1/1] Training with hyperparameters:
+  batch_size=3000, learning_rate=0.001, epochs=200,
+  n_layers=4, hidden_layer_size=4096,
+  dropout_rate=0.2, weight_decay=1e-05,
+  n_normalizer_samples=10000, optimizer=adamw
+2025-04-19 18:55:47,791 - INFO - Training model...
+2025-04-19 18:57:28,298 - INFO - [Epoch 1] LR: 9.999383e-04 | Train loss: 6045.5322, MAPE: 37.50, MSE: 6044.42 | Val loss: 282.3967, MAPE: 6.42, MSE: 282.51
+2025-04-19 18:58:55,145 - INFO - [Epoch 2] LR: 9.997532e-04 | Train loss: 204.4503, MAPE: 6.15, MSE: 204.52 | Val loss: 192.4285, MAPE: 5.73, MSE: 192.53
+2025-04-19 19:00:23,101 - INFO - [Epoch 3] LR: 9.994447e-04 | Train loss: 196.1653, MAPE: 5.97, MSE: 196.23 | Val loss: 182.0158, MAPE: 5.49, MSE: 182.11
+2025-04-19 19:01:48,035 - INFO - [Epoch 4] LR: 9.990130e-04 | Train loss: 189.4341, MAPE: 5.79, MSE: 189.50 | Val loss: 179.3778, MAPE: 5.41, MSE: 179.48
+2025-04-19 19:03:15,172 - INFO - [Epoch 5] LR: 9.984581e-04 | Train loss: 185.7969, MAPE: 5.71, MSE: 185.86 | Val loss: 181.2838, MAPE: 5.47, MSE: 181.39
+2025-04-19 19:04:40,834 - INFO - [Epoch 6] LR: 9.977801e-04 | Train loss: 183.5898, MAPE: 5.67, MSE: 183.66 | Val loss: 175.8642, MAPE: 5.36, MSE: 175.97
+2025-04-19 19:06:09,373 - INFO - [Epoch 7] LR: 9.969793e-04 | Train loss: 181.9197, MAPE: 5.64, MSE: 181.99 | Val loss: 171.3994, MAPE: 5.38, MSE: 171.50
+2025-04-19 19:07:37,200 - INFO - [Epoch 8] LR: 9.960558e-04 | Train loss: 180.7306, MAPE: 5.61, MSE: 180.80 | Val loss: 169.6746, MAPE: 5.26, MSE: 169.78
+2025-04-19 19:09:01,598 - INFO - [Epoch 9] LR: 9.950099e-04 | Train loss: 179.4978, MAPE: 5.59, MSE: 179.57 | Val loss: 170.4906, MAPE: 5.32, MSE: 170.59
+2025-04-19 19:10:30,343 - INFO - [Epoch 10] LR: 9.938418e-04 | Train loss: 178.5441, MAPE: 5.58, MSE: 178.61 | Val loss: 169.3879, MAPE: 5.38, MSE: 169.49
+2025-04-19 19:11:55,749 - INFO - [Epoch 11] LR: 9.925518e-04 | Train loss: 177.8401, MAPE: 5.56, MSE: 177.91 | Val loss: 168.1757, MAPE: 5.32, MSE: 168.28
+2025-04-19 19:13:23,958 - INFO - [Epoch 12] LR: 9.911401e-04 | Train loss: 177.1770, MAPE: 5.55, MSE: 177.25 | Val loss: 168.7179, MAPE: 5.38, MSE: 168.82
+2025-04-19 19:14:52,626 - INFO - [Epoch 13] LR: 9.896074e-04 | Train loss: 176.8297, MAPE: 5.54, MSE: 176.90 | Val loss: 167.4245, MAPE: 5.32, MSE: 167.53
+2025-04-19 19:16:18,468 - INFO - [Epoch 14] LR: 9.879537e-04 | Train loss: 176.0233, MAPE: 5.53, MSE: 176.09 | Val loss: 167.6419, MAPE: 5.23, MSE: 167.74
+2025-04-19 19:17:44,784 - INFO - [Epoch 15] LR: 9.861796e-04 | Train loss: 175.5598, MAPE: 5.52, MSE: 175.63 | Val loss: 167.0211, MAPE: 5.36, MSE: 167.12
+2025-04-19 19:19:16,213 - INFO - [Epoch 16] LR: 9.842855e-04 | Train loss: 175.1546, MAPE: 5.51, MSE: 175.22 | Val loss: 166.4761, MAPE: 5.22, MSE: 166.58
+2025-04-19 19:20:43,316 - INFO - [Epoch 17] LR: 9.822717e-04 | Train loss: 174.7249, MAPE: 5.51, MSE: 174.79 | Val loss: 165.8906, MAPE: 5.28, MSE: 165.99
+2025-04-19 19:22:08,978 - INFO - [Epoch 18] LR: 9.801391e-04 | Train loss: 174.2312, MAPE: 5.50, MSE: 174.30 | Val loss: 167.3879, MAPE: 5.31, MSE: 167.49
+2025-04-19 19:23:34,388 - INFO - [Epoch 19] LR: 9.778879e-04 | Train loss: 173.8380, MAPE: 5.49, MSE: 173.91 | Val loss: 166.0030, MAPE: 5.24, MSE: 166.10
+2025-04-19 19:24:59,619 - INFO - [Epoch 20] LR: 9.755188e-04 | Train loss: 173.5469, MAPE: 5.49, MSE: 173.61 | Val loss: 166.0667, MAPE: 5.22, MSE: 166.17
+2025-04-19 19:26:28,152 - INFO - [Epoch 21] LR: 9.730322e-04 | Train loss: 173.2563, MAPE: 5.48, MSE: 173.32 | Val loss: 165.9125, MAPE: 5.23, MSE: 166.01
+2025-04-19 19:27:53,316 - INFO - [Epoch 22] LR: 9.704289e-04 | Train loss: 172.9596, MAPE: 5.48, MSE: 173.03 | Val loss: 166.1243, MAPE: 5.20, MSE: 166.22
+2025-04-19 19:29:21,703 - INFO - [Epoch 23] LR: 9.677094e-04 | Train loss: 172.5424, MAPE: 5.47, MSE: 172.61 | Val loss: 166.8916, MAPE: 5.19, MSE: 166.99
+2025-04-19 19:30:47,659 - INFO - [Epoch 24] LR: 9.648746e-04 | Train loss: 172.3013, MAPE: 5.47, MSE: 172.37 | Val loss: 164.5905, MAPE: 5.19, MSE: 164.69
+2025-04-19 19:32:15,566 - INFO - [Epoch 25] LR: 9.619250e-04 | Train loss: 171.9572, MAPE: 5.46, MSE: 172.02 | Val loss: 165.3460, MAPE: 5.18, MSE: 165.45
+2025-04-19 19:33:41,934 - INFO - [Epoch 26] LR: 9.588613e-04 | Train loss: 171.6734, MAPE: 5.46, MSE: 171.74 | Val loss: 164.8693, MAPE: 5.17, MSE: 164.97
+2025-04-19 19:35:09,356 - INFO - [Epoch 27] LR: 9.556844e-04 | Train loss: 171.4192, MAPE: 5.46, MSE: 171.49 | Val loss: 165.4843, MAPE: 5.17, MSE: 165.58
+2025-04-19 19:36:35,106 - INFO - [Epoch 28] LR: 9.523951e-04 | Train loss: 171.2916, MAPE: 5.45, MSE: 171.36 | Val loss: 164.7766, MAPE: 5.19, MSE: 164.88
+2025-04-19 19:38:01,390 - INFO - [Epoch 29] LR: 9.489941e-04 | Train loss: 170.8632, MAPE: 5.45, MSE: 170.93 | Val loss: 164.3081, MAPE: 5.15, MSE: 164.41
+2025-04-19 19:39:26,199 - INFO - [Epoch 30] LR: 9.454822e-04 | Train loss: 170.7023, MAPE: 5.44, MSE: 170.77 | Val loss: 163.5225, MAPE: 5.18, MSE: 163.62
+2025-04-19 19:40:52,657 - INFO - [Epoch 31] LR: 9.418604e-04 | Train loss: 170.4343, MAPE: 5.44, MSE: 170.50 | Val loss: 164.7929, MAPE: 5.23, MSE: 164.89
+2025-04-19 19:42:18,279 - INFO - [Epoch 32] LR: 9.381295e-04 | Train loss: 170.1470, MAPE: 5.44, MSE: 170.21 | Val loss: 164.5350, MAPE: 5.17, MSE: 164.64
+2025-04-19 19:43:43,906 - INFO - [Epoch 33] LR: 9.342905e-04 | Train loss: 169.9994, MAPE: 5.43, MSE: 170.07 | Val loss: 163.7335, MAPE: 5.14, MSE: 163.84
+2025-04-19 19:45:10,087 - INFO - [Epoch 34] LR: 9.303443e-04 | Train loss: 169.7951, MAPE: 5.43, MSE: 169.86 | Val loss: 164.3983, MAPE: 5.18, MSE: 164.50
+2025-04-19 19:46:37,046 - INFO - [Epoch 35] LR: 9.262918e-04 | Train loss: 169.5526, MAPE: 5.42, MSE: 169.62 | Val loss: 163.4470, MAPE: 5.16, MSE: 163.55
+2025-04-19 19:48:04,632 - INFO - [Epoch 36] LR: 9.221341e-04 | Train loss: 169.3037, MAPE: 5.42, MSE: 169.37 | Val loss: 163.4743, MAPE: 5.15, MSE: 163.58
+2025-04-19 19:49:32,498 - INFO - [Epoch 37] LR: 9.178723e-04 | Train loss: 169.0662, MAPE: 5.42, MSE: 169.13 | Val loss: 163.7693, MAPE: 5.13, MSE: 163.87
+2025-04-19 19:50:58,249 - INFO - [Epoch 38] LR: 9.135073e-04 | Train loss: 168.9213, MAPE: 5.41, MSE: 168.99 | Val loss: 163.0654, MAPE: 5.13, MSE: 163.17
+2025-04-19 19:52:25,757 - INFO - [Epoch 39] LR: 9.090402e-04 | Train loss: 168.6805, MAPE: 5.41, MSE: 168.74 | Val loss: 165.7307, MAPE: 5.16, MSE: 165.83
+2025-04-19 19:53:54,668 - INFO - [Epoch 40] LR: 9.044721e-04 | Train loss: 168.5133, MAPE: 5.41, MSE: 168.57 | Val loss: 163.9656, MAPE: 5.13, MSE: 164.07
+2025-04-19 19:55:21,732 - INFO - [Epoch 41] LR: 8.998043e-04 | Train loss: 168.3082, MAPE: 5.40, MSE: 168.37 | Val loss: 162.9188, MAPE: 5.11, MSE: 163.02
+2025-04-19 19:56:49,179 - INFO - [Epoch 42] LR: 8.950377e-04 | Train loss: 167.9872, MAPE: 5.40, MSE: 168.05 | Val loss: 162.4404, MAPE: 5.11, MSE: 162.54
+2025-04-19 19:58:16,423 - INFO - [Epoch 43] LR: 8.901736e-04 | Train loss: 167.8757, MAPE: 5.40, MSE: 167.94 | Val loss: 163.8409, MAPE: 5.12, MSE: 163.94
+2025-04-19 19:59:44,926 - INFO - [Epoch 44] LR: 8.852133e-04 | Train loss: 167.6863, MAPE: 5.40, MSE: 167.75 | Val loss: 162.3912, MAPE: 5.10, MSE: 162.49
+2025-04-19 20:01:12,328 - INFO - [Epoch 45] LR: 8.801577e-04 | Train loss: 167.4900, MAPE: 5.39, MSE: 167.55 | Val loss: 163.1859, MAPE: 5.11, MSE: 163.29
+2025-04-19 20:02:39,301 - INFO - [Epoch 46] LR: 8.750085e-04 | Train loss: 167.4262, MAPE: 5.39, MSE: 167.49 | Val loss: 162.9889, MAPE: 5.11, MSE: 163.09
+2025-04-19 20:04:09,100 - INFO - [Epoch 47] LR: 8.697666e-04 | Train loss: 167.1843, MAPE: 5.39, MSE: 167.25 | Val loss: 162.5993, MAPE: 5.11, MSE: 162.70
+2025-04-19 20:05:33,898 - INFO - [Epoch 48] LR: 8.644335e-04 | Train loss: 167.0161, MAPE: 5.39, MSE: 167.08 | Val loss: 162.2625, MAPE: 5.12, MSE: 162.36
+2025-04-19 20:07:05,742 - INFO - [Epoch 49] LR: 8.590104e-04 | Train loss: 166.7821, MAPE: 5.39, MSE: 166.85 | Val loss: 162.5359, MAPE: 5.10, MSE: 162.64
+2025-04-19 20:08:34,917 - INFO - [Epoch 50] LR: 8.534988e-04 | Train loss: 166.5888, MAPE: 5.39, MSE: 166.65 | Val loss: 162.4682, MAPE: 5.10, MSE: 162.57
+2025-04-19 20:10:05,593 - INFO - [Epoch 51] LR: 8.478998e-04 | Train loss: 166.5235, MAPE: 5.38, MSE: 166.59 | Val loss: 162.1782, MAPE: 5.10, MSE: 162.28
+2025-04-19 20:11:30,992 - INFO - [Epoch 52] LR: 8.422149e-04 | Train loss: 166.4174, MAPE: 5.38, MSE: 166.48 | Val loss: 163.1205, MAPE: 5.09, MSE: 163.22
+2025-04-19 20:13:00,164 - INFO - [Epoch 53] LR: 8.364455e-04 | Train loss: 166.3165, MAPE: 5.38, MSE: 166.38 | Val loss: 162.7339, MAPE: 5.10, MSE: 162.84
+2025-04-19 20:14:29,590 - INFO - [Epoch 54] LR: 8.305933e-04 | Train loss: 166.2208, MAPE: 5.38, MSE: 166.29 | Val loss: 162.1403, MAPE: 5.11, MSE: 162.24
+2025-04-19 20:15:54,135 - INFO - [Epoch 55] LR: 8.246593e-04 | Train loss: 165.9311, MAPE: 5.38, MSE: 166.00 | Val loss: 163.1508, MAPE: 5.10, MSE: 163.25
+2025-04-19 20:17:22,306 - INFO - [Epoch 56] LR: 8.186452e-04 | Train loss: 165.8364, MAPE: 5.38, MSE: 165.90 | Val loss: 162.7586, MAPE: 5.10, MSE: 162.86
+2025-04-19 20:18:48,870 - INFO - [Epoch 57] LR: 8.125525e-04 | Train loss: 165.6756, MAPE: 5.37, MSE: 165.74 | Val loss: 161.8151, MAPE: 5.11, MSE: 161.92
+2025-04-19 20:20:14,584 - INFO - [Epoch 58] LR: 8.063827e-04 | Train loss: 165.4978, MAPE: 5.37, MSE: 165.56 | Val loss: 162.1523, MAPE: 5.10, MSE: 162.25
+2025-04-19 20:21:41,426 - INFO - [Epoch 59] LR: 8.001372e-04 | Train loss: 165.3486, MAPE: 5.37, MSE: 165.41 | Val loss: 162.4380, MAPE: 5.09, MSE: 162.54
+2025-04-19 20:23:08,435 - INFO - [Epoch 60] LR: 7.938176e-04 | Train loss: 165.3390, MAPE: 5.37, MSE: 165.40 | Val loss: 162.6046, MAPE: 5.11, MSE: 162.70
+2025-04-19 20:24:34,025 - INFO - [Epoch 61] LR: 7.874254e-04 | Train loss: 165.1590, MAPE: 5.37, MSE: 165.22 | Val loss: 162.8286, MAPE: 5.09, MSE: 162.93
+2025-04-19 20:25:59,061 - INFO - [Epoch 62] LR: 7.809625e-04 | Train loss: 165.0293, MAPE: 5.37, MSE: 165.09 | Val loss: 161.4366, MAPE: 5.09, MSE: 161.54
+2025-04-19 20:27:24,247 - INFO - [Epoch 63] LR: 7.744299e-04 | Train loss: 164.9919, MAPE: 5.36, MSE: 165.05 | Val loss: 161.6070, MAPE: 5.08, MSE: 161.71
+2025-04-19 20:28:50,693 - INFO - [Epoch 64] LR: 7.678299e-04 | Train loss: 164.8998, MAPE: 5.36, MSE: 164.96 | Val loss: 162.3553, MAPE: 5.10, MSE: 162.46
+2025-04-19 20:30:14,650 - INFO - [Epoch 65] LR: 7.611637e-04 | Train loss: 164.6967, MAPE: 5.36, MSE: 164.76 | Val loss: 162.5796, MAPE: 5.08, MSE: 162.68
+2025-04-19 20:31:39,858 - INFO - [Epoch 66] LR: 7.544329e-04 | Train loss: 164.4369, MAPE: 5.36, MSE: 164.50 | Val loss: 161.6454, MAPE: 5.09, MSE: 161.75
+2025-04-19 20:33:04,542 - INFO - [Epoch 67] LR: 7.476393e-04 | Train loss: 164.4275, MAPE: 5.36, MSE: 164.49 | Val loss: 162.1049, MAPE: 5.08, MSE: 162.21
+2025-04-19 20:34:33,773 - INFO - [Epoch 68] LR: 7.407848e-04 | Train loss: 164.3756, MAPE: 5.36, MSE: 164.44 | Val loss: 161.7862, MAPE: 5.09, MSE: 161.89
+2025-04-19 20:35:58,115 - INFO - [Epoch 69] LR: 7.338707e-04 | Train loss: 164.2401, MAPE: 5.36, MSE: 164.30 | Val loss: 161.9705, MAPE: 5.09, MSE: 162.07
+2025-04-19 20:37:25,903 - INFO - [Epoch 70] LR: 7.268990e-04 | Train loss: 164.1179, MAPE: 5.36, MSE: 164.18 | Val loss: 162.5424, MAPE: 5.09, MSE: 162.64
+2025-04-19 20:38:53,141 - INFO - [Epoch 71] LR: 7.198710e-04 | Train loss: 164.1616, MAPE: 5.36, MSE: 164.22 | Val loss: 161.7795, MAPE: 5.09, MSE: 161.88
+2025-04-19 20:40:19,159 - INFO - [Epoch 72] LR: 7.127890e-04 | Train loss: 163.8760, MAPE: 5.35, MSE: 163.94 | Val loss: 162.6158, MAPE: 5.09, MSE: 162.71
+2025-04-19 20:40:19,299 - INFO - Final validation MSE: 162.714722
+2025-04-19 20:40:19,300 - INFO - 
+=== Best hyperparameters ===
+2025-04-19 20:40:19,300 - INFO - batch_size=3000, learning_rate=0.001, epochs=200,
+n_layers=4, hidden_layer_size=4096,
+dropout_rate=0.2, weight_decay=1e-05,
+n_normalizer_samples=10000, optimizer=adamw
+2025-04-19 20:40:19,300 - INFO - Lowest achieved validation MSE: 162.714722
+
+PtNet_mmc
+
+
+
+2025-04-21 20:58:08,050 - INFO - Loading data from: /scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root
+2025-04-21 20:58:08,504 - INFO - Data loaded successfully.
+2025-04-21 20:58:08,504 - INFO - 
+================================================================================
+2025-04-21 20:58:08,504 - INFO - [1/1] Training with hyperparameters:
+  batch_size=3000, learning_rate=0.001, epochs=200,
+  n_layers=4, hidden_layer_size=4096,
+  dropout_rate=0.2, weight_decay=1e-05,
+  n_normalizer_samples=10000, optimizer=adamw
+2025-04-21 20:58:11,444 - INFO - Training model...
+2025-04-21 20:59:42,869 - INFO - [Epoch 1] LR: 9.999383e-04 | Train loss: 6233.5684, MAPE: 38.03, MSE: 6232.50 | Val loss: 224.8325, MAPE: 6.03, MSE: 224.92
+2025-04-21 21:01:05,061 - INFO - [Epoch 2] LR: 9.997532e-04 | Train loss: 209.6144, MAPE: 6.08, MSE: 209.75 | Val loss: 190.0848, MAPE: 5.56, MSE: 190.18
+2025-04-21 21:02:25,837 - INFO - [Epoch 3] LR: 9.994447e-04 | Train loss: 200.3966, MAPE: 5.92, MSE: 200.53 | Val loss: 183.1347, MAPE: 5.46, MSE: 183.23
+2025-04-21 21:03:42,224 - INFO - [Epoch 4] LR: 9.990130e-04 | Train loss: 195.0281, MAPE: 5.81, MSE: 195.16 | Val loss: 179.7292, MAPE: 5.44, MSE: 179.83
+2025-04-21 21:04:59,913 - INFO - [Epoch 5] LR: 9.984581e-04 | Train loss: 190.7679, MAPE: 5.73, MSE: 190.90 | Val loss: 175.6089, MAPE: 5.43, MSE: 175.71
+2025-04-21 21:06:20,263 - INFO - [Epoch 6] LR: 9.977801e-04 | Train loss: 187.7175, MAPE: 5.67, MSE: 187.85 | Val loss: 174.8387, MAPE: 5.36, MSE: 174.94
+2025-04-21 21:07:36,773 - INFO - [Epoch 7] LR: 9.969793e-04 | Train loss: 185.4091, MAPE: 5.63, MSE: 185.54 | Val loss: 173.0891, MAPE: 5.36, MSE: 173.19
+2025-04-21 21:08:57,654 - INFO - [Epoch 8] LR: 9.960558e-04 | Train loss: 183.6838, MAPE: 5.61, MSE: 183.81 | Val loss: 171.1652, MAPE: 5.35, MSE: 171.27
+2025-04-21 21:10:16,998 - INFO - [Epoch 9] LR: 9.950099e-04 | Train loss: 182.2577, MAPE: 5.58, MSE: 182.39 | Val loss: 170.3744, MAPE: 5.33, MSE: 170.48
+2025-04-21 21:11:36,243 - INFO - [Epoch 10] LR: 9.938418e-04 | Train loss: 180.9821, MAPE: 5.56, MSE: 181.11 | Val loss: 169.6351, MAPE: 5.32, MSE: 169.74
+2025-04-21 21:12:49,325 - INFO - [Epoch 11] LR: 9.925518e-04 | Train loss: 180.0382, MAPE: 5.55, MSE: 180.17 | Val loss: 169.6470, MAPE: 5.29, MSE: 169.75
+2025-04-21 21:14:07,509 - INFO - [Epoch 12] LR: 9.911401e-04 | Train loss: 179.1697, MAPE: 5.54, MSE: 179.29 | Val loss: 167.9195, MAPE: 5.29, MSE: 168.02
+2025-04-21 21:15:27,332 - INFO - [Epoch 13] LR: 9.896074e-04 | Train loss: 178.3537, MAPE: 5.52, MSE: 178.48 | Val loss: 170.5619, MAPE: 5.26, MSE: 170.66
+2025-04-21 21:16:45,025 - INFO - [Epoch 14] LR: 9.879537e-04 | Train loss: 177.8051, MAPE: 5.52, MSE: 177.93 | Val loss: 168.3662, MAPE: 5.28, MSE: 168.47
+2025-04-21 21:18:03,940 - INFO - [Epoch 15] LR: 9.861796e-04 | Train loss: 177.1660, MAPE: 5.51, MSE: 177.29 | Val loss: 172.2930, MAPE: 5.34, MSE: 172.39
+2025-04-21 21:19:22,656 - INFO - [Epoch 16] LR: 9.842855e-04 | Train loss: 176.7991, MAPE: 5.50, MSE: 176.92 | Val loss: 166.7331, MAPE: 5.25, MSE: 166.84
+2025-04-21 21:20:42,942 - INFO - [Epoch 17] LR: 9.822717e-04 | Train loss: 176.0996, MAPE: 5.50, MSE: 176.22 | Val loss: 168.0723, MAPE: 5.23, MSE: 168.17
+2025-04-21 21:22:02,201 - INFO - [Epoch 18] LR: 9.801391e-04 | Train loss: 175.7791, MAPE: 5.49, MSE: 175.90 | Val loss: 167.3249, MAPE: 5.23, MSE: 167.43
+2025-04-21 21:23:21,143 - INFO - [Epoch 19] LR: 9.778879e-04 | Train loss: 175.3438, MAPE: 5.49, MSE: 175.47 | Val loss: 168.0249, MAPE: 5.25, MSE: 168.13
+2025-04-21 21:24:36,652 - INFO - [Epoch 20] LR: 9.755188e-04 | Train loss: 174.9737, MAPE: 5.48, MSE: 175.10 | Val loss: 167.9723, MAPE: 5.30, MSE: 168.07
+2025-04-21 21:25:54,749 - INFO - [Epoch 21] LR: 9.730322e-04 | Train loss: 174.5805, MAPE: 5.47, MSE: 174.71 | Val loss: 168.8400, MAPE: 5.25, MSE: 168.94
+2025-04-21 21:27:11,360 - INFO - [Epoch 22] LR: 9.704289e-04 | Train loss: 174.0585, MAPE: 5.47, MSE: 174.18 | Val loss: 166.6064, MAPE: 5.25, MSE: 166.71
+2025-04-21 21:28:30,196 - INFO - [Epoch 23] LR: 9.677094e-04 | Train loss: 173.7712, MAPE: 5.46, MSE: 173.90 | Val loss: 168.8266, MAPE: 5.24, MSE: 168.93
+2025-04-21 21:29:47,455 - INFO - [Epoch 24] LR: 9.648746e-04 | Train loss: 173.5287, MAPE: 5.46, MSE: 173.65 | Val loss: 165.4486, MAPE: 5.24, MSE: 165.55
+2025-04-21 21:31:05,748 - INFO - [Epoch 25] LR: 9.619250e-04 | Train loss: 173.2472, MAPE: 5.45, MSE: 173.37 | Val loss: 166.3350, MAPE: 5.23, MSE: 166.43
+2025-04-21 21:32:24,211 - INFO - [Epoch 26] LR: 9.588613e-04 | Train loss: 172.9046, MAPE: 5.45, MSE: 173.03 | Val loss: 164.4513, MAPE: 5.25, MSE: 164.55
+2025-04-21 21:33:44,848 - INFO - [Epoch 27] LR: 9.556844e-04 | Train loss: 172.6097, MAPE: 5.45, MSE: 172.73 | Val loss: 165.1255, MAPE: 5.22, MSE: 165.23
+2025-04-21 21:35:02,699 - INFO - [Epoch 28] LR: 9.523951e-04 | Train loss: 172.4508, MAPE: 5.44, MSE: 172.57 | Val loss: 164.7512, MAPE: 5.20, MSE: 164.85
+2025-04-21 21:36:20,876 - INFO - [Epoch 29] LR: 9.489941e-04 | Train loss: 172.0299, MAPE: 5.44, MSE: 172.16 | Val loss: 164.2268, MAPE: 5.20, MSE: 164.33
+2025-04-21 21:37:39,566 - INFO - [Epoch 30] LR: 9.454822e-04 | Train loss: 171.8728, MAPE: 5.44, MSE: 172.00 | Val loss: 164.1074, MAPE: 5.24, MSE: 164.21
+2025-04-21 21:38:59,161 - INFO - [Epoch 31] LR: 9.418604e-04 | Train loss: 171.6051, MAPE: 5.43, MSE: 171.73 | Val loss: 164.7143, MAPE: 5.22, MSE: 164.81
+2025-04-21 21:40:19,015 - INFO - [Epoch 32] LR: 9.381295e-04 | Train loss: 171.3318, MAPE: 5.43, MSE: 171.46 | Val loss: 165.6752, MAPE: 5.21, MSE: 165.78
+2025-04-21 21:41:35,395 - INFO - [Epoch 33] LR: 9.342905e-04 | Train loss: 171.0908, MAPE: 5.42, MSE: 171.21 | Val loss: 164.7330, MAPE: 5.20, MSE: 164.83
+2025-04-21 21:42:54,718 - INFO - [Epoch 34] LR: 9.303443e-04 | Train loss: 170.8761, MAPE: 5.42, MSE: 171.00 | Val loss: 164.6927, MAPE: 5.19, MSE: 164.79
+2025-04-21 21:44:15,702 - INFO - [Epoch 35] LR: 9.262918e-04 | Train loss: 170.5984, MAPE: 5.42, MSE: 170.72 | Val loss: 163.1342, MAPE: 5.20, MSE: 163.24
+2025-04-21 21:45:32,728 - INFO - [Epoch 36] LR: 9.221341e-04 | Train loss: 170.3250, MAPE: 5.41, MSE: 170.44 | Val loss: 163.8141, MAPE: 5.22, MSE: 163.91
+2025-04-21 21:46:49,121 - INFO - [Epoch 37] LR: 9.178723e-04 | Train loss: 170.1953, MAPE: 5.41, MSE: 170.32 | Val loss: 164.8555, MAPE: 5.31, MSE: 164.95
+2025-04-21 21:48:08,477 - INFO - [Epoch 38] LR: 9.135073e-04 | Train loss: 169.7653, MAPE: 5.40, MSE: 169.89 | Val loss: 164.0479, MAPE: 5.20, MSE: 164.15
+2025-04-21 21:49:27,762 - INFO - [Epoch 39] LR: 9.090402e-04 | Train loss: 169.6047, MAPE: 5.40, MSE: 169.73 | Val loss: 163.9833, MAPE: 5.25, MSE: 164.08
+2025-04-21 21:50:44,898 - INFO - [Epoch 40] LR: 9.044721e-04 | Train loss: 169.3956, MAPE: 5.40, MSE: 169.52 | Val loss: 163.1127, MAPE: 5.23, MSE: 163.21
+2025-04-21 21:52:00,669 - INFO - [Epoch 41] LR: 8.998043e-04 | Train loss: 169.2944, MAPE: 5.39, MSE: 169.42 | Val loss: 163.3340, MAPE: 5.22, MSE: 163.43
+2025-04-21 21:53:19,065 - INFO - [Epoch 42] LR: 8.950377e-04 | Train loss: 169.0126, MAPE: 5.39, MSE: 169.13 | Val loss: 164.1196, MAPE: 5.22, MSE: 164.22
+2025-04-21 21:54:35,214 - INFO - [Epoch 43] LR: 8.901736e-04 | Train loss: 168.9051, MAPE: 5.39, MSE: 169.03 | Val loss: 165.5783, MAPE: 5.19, MSE: 165.68
+2025-04-21 21:55:51,257 - INFO - [Epoch 44] LR: 8.852133e-04 | Train loss: 168.5853, MAPE: 5.39, MSE: 168.71 | Val loss: 164.7487, MAPE: 5.22, MSE: 164.85
+2025-04-21 21:57:11,337 - INFO - [Epoch 45] LR: 8.801577e-04 | Train loss: 168.4155, MAPE: 5.38, MSE: 168.54 | Val loss: 163.8613, MAPE: 5.24, MSE: 163.96
+2025-04-21 21:58:31,083 - INFO - [Epoch 46] LR: 8.750085e-04 | Train loss: 168.2614, MAPE: 5.38, MSE: 168.38 | Val loss: 165.1216, MAPE: 5.19, MSE: 165.22
+2025-04-21 21:59:48,837 - INFO - [Epoch 47] LR: 8.697666e-04 | Train loss: 168.1059, MAPE: 5.38, MSE: 168.22 | Val loss: 164.1081, MAPE: 5.20, MSE: 164.20
+2025-04-21 22:01:09,036 - INFO - [Epoch 48] LR: 8.644335e-04 | Train loss: 167.8221, MAPE: 5.38, MSE: 167.94 | Val loss: 164.0754, MAPE: 5.22, MSE: 164.17
+2025-04-21 22:02:29,118 - INFO - [Epoch 49] LR: 8.590104e-04 | Train loss: 167.5371, MAPE: 5.37, MSE: 167.65 | Val loss: 165.7420, MAPE: 5.29, MSE: 165.83
+2025-04-21 22:03:46,557 - INFO - [Epoch 50] LR: 8.534988e-04 | Train loss: 167.4542, MAPE: 5.37, MSE: 167.58 | Val loss: 164.5812, MAPE: 5.20, MSE: 164.67
+2025-04-21 22:03:46,715 - INFO - Final validation MSE: 164.673599
+2025-04-21 22:03:46,715 - INFO - 
+=== Best hyperparameters ===
+2025-04-21 22:03:46,715 - INFO - batch_size=3000, learning_rate=0.001, epochs=200,
+n_layers=4, hidden_layer_size=4096,
+dropout_rate=0.2, weight_decay=1e-05,
+n_normalizer_samples=10000, optimizer=adamw
+2025-04-21 22:03:46,715 - INFO - Lowest achieved validation MSE: 164.673599
+2025-04-21 22:04:28,281 - INFO - Loading data from: /scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root
+2025-04-21 22:04:28,649 - INFO - Data loaded successfully.
+2025-04-21 22:04:28,650 - INFO - 
+================================================================================
+2025-04-21 22:04:28,650 - INFO - [1/1] Training with hyperparameters:
+  batch_size=3000, learning_rate=0.001, epochs=200,
+  n_layers=4, hidden_layer_size=4096,
+  dropout_rate=0.2, weight_decay=1e-05,
+  n_normalizer_samples=10000, optimizer=adamw
+2025-04-21 22:04:29,577 - INFO - Training model...
+2025-04-21 22:06:00,615 - INFO - [Epoch 1] LR: 9.999383e-04 | Train loss: 6107.0713, MAPE: 37.85, MSE: 6106.04 | Val loss: 213.1969, MAPE: 6.37, MSE: 213.29
+2025-04-21 22:07:18,414 - INFO - [Epoch 2] LR: 9.997532e-04 | Train loss: 210.9210, MAPE: 6.12, MSE: 211.07 | Val loss: 192.0848, MAPE: 5.65, MSE: 192.18
+2025-04-21 22:08:35,659 - INFO - [Epoch 3] LR: 9.994447e-04 | Train loss: 201.2558, MAPE: 5.95, MSE: 201.39 | Val loss: 183.0877, MAPE: 5.46, MSE: 183.19
+2025-04-21 22:09:54,654 - INFO - [Epoch 4] LR: 9.990130e-04 | Train loss: 195.1851, MAPE: 5.83, MSE: 195.32 | Val loss: 176.2551, MAPE: 5.44, MSE: 176.36
+2025-04-21 22:11:13,031 - INFO - [Epoch 5] LR: 9.984581e-04 | Train loss: 190.5811, MAPE: 5.74, MSE: 190.72 | Val loss: 177.7390, MAPE: 5.47, MSE: 177.84
+2025-04-21 22:12:33,441 - INFO - [Epoch 6] LR: 9.977801e-04 | Train loss: 187.1610, MAPE: 5.68, MSE: 187.29 | Val loss: 173.2119, MAPE: 5.42, MSE: 173.31
+2025-04-21 22:13:51,066 - INFO - [Epoch 7] LR: 9.969793e-04 | Train loss: 184.9032, MAPE: 5.65, MSE: 185.04 | Val loss: 171.7679, MAPE: 5.35, MSE: 171.87
+2025-04-21 22:15:08,390 - INFO - [Epoch 8] LR: 9.960558e-04 | Train loss: 183.5686, MAPE: 5.62, MSE: 183.70 | Val loss: 170.6007, MAPE: 5.37, MSE: 170.71
+2025-04-21 22:16:26,808 - INFO - [Epoch 9] LR: 9.950099e-04 | Train loss: 182.1460, MAPE: 5.60, MSE: 182.28 | Val loss: 170.8595, MAPE: 5.33, MSE: 170.96
+2025-04-21 22:17:43,498 - INFO - [Epoch 10] LR: 9.938418e-04 | Train loss: 181.0643, MAPE: 5.58, MSE: 181.20 | Val loss: 169.9094, MAPE: 5.29, MSE: 170.01
+2025-04-21 22:18:59,055 - INFO - [Epoch 11] LR: 9.925518e-04 | Train loss: 180.1630, MAPE: 5.56, MSE: 180.29 | Val loss: 169.7784, MAPE: 5.29, MSE: 169.88
+2025-04-21 22:20:17,335 - INFO - [Epoch 12] LR: 9.911401e-04 | Train loss: 179.3201, MAPE: 5.55, MSE: 179.45 | Val loss: 169.0243, MAPE: 5.29, MSE: 169.13
+2025-04-21 22:21:30,425 - INFO - [Epoch 13] LR: 9.896074e-04 | Train loss: 178.6286, MAPE: 5.54, MSE: 178.76 | Val loss: 167.7251, MAPE: 5.25, MSE: 167.83
+2025-04-21 22:22:49,011 - INFO - [Epoch 14] LR: 9.879537e-04 | Train loss: 177.8887, MAPE: 5.53, MSE: 178.02 | Val loss: 171.0203, MAPE: 5.32, MSE: 171.12
+2025-04-21 22:24:08,631 - INFO - [Epoch 15] LR: 9.861796e-04 | Train loss: 177.3749, MAPE: 5.52, MSE: 177.50 | Val loss: 171.3245, MAPE: 5.28, MSE: 171.43
+2025-04-21 22:25:26,147 - INFO - [Epoch 16] LR: 9.842855e-04 | Train loss: 176.8116, MAPE: 5.51, MSE: 176.95 | Val loss: 168.3834, MAPE: 5.23, MSE: 168.49
+2025-04-21 22:26:42,898 - INFO - [Epoch 17] LR: 9.822717e-04 | Train loss: 176.3819, MAPE: 5.50, MSE: 176.51 | Val loss: 167.3921, MAPE: 5.25, MSE: 167.49
+2025-04-21 22:28:01,940 - INFO - [Epoch 18] LR: 9.801391e-04 | Train loss: 175.9121, MAPE: 5.50, MSE: 176.04 | Val loss: 166.1138, MAPE: 5.20, MSE: 166.22
+2025-04-21 22:29:22,810 - INFO - [Epoch 19] LR: 9.778879e-04 | Train loss: 175.5349, MAPE: 5.49, MSE: 175.67 | Val loss: 167.9322, MAPE: 5.20, MSE: 168.03
+2025-04-21 22:30:40,209 - INFO - [Epoch 20] LR: 9.755188e-04 | Train loss: 175.1077, MAPE: 5.48, MSE: 175.24 | Val loss: 168.8813, MAPE: 5.25, MSE: 168.98
+2025-04-21 22:32:00,200 - INFO - [Epoch 21] LR: 9.730322e-04 | Train loss: 174.7737, MAPE: 5.48, MSE: 174.91 | Val loss: 169.0900, MAPE: 5.20, MSE: 169.19
+2025-04-21 22:33:19,062 - INFO - [Epoch 22] LR: 9.704289e-04 | Train loss: 174.4507, MAPE: 5.47, MSE: 174.58 | Val loss: 167.3535, MAPE: 5.20, MSE: 167.45
+2025-04-21 22:34:32,724 - INFO - [Epoch 23] LR: 9.677094e-04 | Train loss: 173.9889, MAPE: 5.46, MSE: 174.12 | Val loss: 168.7137, MAPE: 5.23, MSE: 168.81
+2025-04-21 22:35:50,168 - INFO - [Epoch 24] LR: 9.648746e-04 | Train loss: 173.6364, MAPE: 5.46, MSE: 173.77 | Val loss: 165.1595, MAPE: 5.30, MSE: 165.26
+2025-04-21 22:37:07,086 - INFO - [Epoch 25] LR: 9.619250e-04 | Train loss: 173.3958, MAPE: 5.45, MSE: 173.53 | Val loss: 165.1129, MAPE: 5.20, MSE: 165.21
+2025-04-21 22:38:24,598 - INFO - [Epoch 26] LR: 9.588613e-04 | Train loss: 172.9675, MAPE: 5.44, MSE: 173.10 | Val loss: 163.6552, MAPE: 5.20, MSE: 163.76
+2025-04-21 22:39:42,790 - INFO - [Epoch 27] LR: 9.556844e-04 | Train loss: 172.5989, MAPE: 5.44, MSE: 172.73 | Val loss: 164.0802, MAPE: 5.23, MSE: 164.18
+2025-04-21 22:41:02,171 - INFO - [Epoch 28] LR: 9.523951e-04 | Train loss: 172.4927, MAPE: 5.43, MSE: 172.62 | Val loss: 164.3598, MAPE: 5.26, MSE: 164.46
+2025-04-21 22:42:19,279 - INFO - [Epoch 29] LR: 9.489941e-04 | Train loss: 171.9984, MAPE: 5.43, MSE: 172.13 | Val loss: 164.7711, MAPE: 5.23, MSE: 164.87
+2025-04-21 22:43:37,488 - INFO - [Epoch 30] LR: 9.454822e-04 | Train loss: 171.6624, MAPE: 5.42, MSE: 171.80 | Val loss: 163.5080, MAPE: 5.30, MSE: 163.61
+2025-04-21 22:44:55,236 - INFO - [Epoch 31] LR: 9.418604e-04 | Train loss: 171.4532, MAPE: 5.42, MSE: 171.58 | Val loss: 163.5457, MAPE: 5.23, MSE: 163.65
+2025-04-21 22:46:11,977 - INFO - [Epoch 32] LR: 9.381295e-04 | Train loss: 171.2740, MAPE: 5.42, MSE: 171.40 | Val loss: 164.7622, MAPE: 5.20, MSE: 164.86
+2025-04-21 22:47:30,010 - INFO - [Epoch 33] LR: 9.342905e-04 | Train loss: 170.8796, MAPE: 5.41, MSE: 171.01 | Val loss: 166.1101, MAPE: 5.24, MSE: 166.21
+2025-04-21 22:48:48,338 - INFO - [Epoch 34] LR: 9.303443e-04 | Train loss: 170.8694, MAPE: 5.41, MSE: 171.00 | Val loss: 163.7150, MAPE: 5.24, MSE: 163.82
+2025-04-21 22:50:08,466 - INFO - [Epoch 35] LR: 9.262918e-04 | Train loss: 170.4042, MAPE: 5.41, MSE: 170.54 | Val loss: 163.3526, MAPE: 5.19, MSE: 163.45
+2025-04-21 22:51:25,501 - INFO - [Epoch 36] LR: 9.221341e-04 | Train loss: 170.1781, MAPE: 5.40, MSE: 170.31 | Val loss: 162.4264, MAPE: 5.27, MSE: 162.53
+2025-04-21 22:52:41,792 - INFO - [Epoch 37] LR: 9.178723e-04 | Train loss: 170.0521, MAPE: 5.40, MSE: 170.18 | Val loss: 163.0084, MAPE: 5.19, MSE: 163.11
+2025-04-21 22:53:57,764 - INFO - [Epoch 38] LR: 9.135073e-04 | Train loss: 169.8667, MAPE: 5.40, MSE: 170.00 | Val loss: 163.2943, MAPE: 5.18, MSE: 163.39
+2025-04-21 22:55:16,303 - INFO - [Epoch 39] LR: 9.090402e-04 | Train loss: 169.6356, MAPE: 5.39, MSE: 169.76 | Val loss: 164.3684, MAPE: 5.24, MSE: 164.47
+2025-04-21 22:56:34,251 - INFO - [Epoch 40] LR: 9.044721e-04 | Train loss: 169.5117, MAPE: 5.39, MSE: 169.64 | Val loss: 165.4897, MAPE: 5.24, MSE: 165.59
+2025-04-21 22:57:51,193 - INFO - [Epoch 41] LR: 8.998043e-04 | Train loss: 169.1917, MAPE: 5.39, MSE: 169.32 | Val loss: 164.3763, MAPE: 5.23, MSE: 164.48
+2025-04-21 22:59:10,118 - INFO - [Epoch 42] LR: 8.950377e-04 | Train loss: 169.1045, MAPE: 5.39, MSE: 169.24 | Val loss: 162.0537, MAPE: 5.25, MSE: 162.15
+2025-04-21 23:00:22,347 - INFO - [Epoch 43] LR: 8.901736e-04 | Train loss: 168.9379, MAPE: 5.38, MSE: 169.06 | Val loss: 163.0492, MAPE: 5.32, MSE: 163.15
+2025-04-21 23:01:41,051 - INFO - [Epoch 44] LR: 8.852133e-04 | Train loss: 168.7816, MAPE: 5.38, MSE: 168.91 | Val loss: 165.4303, MAPE: 5.25, MSE: 165.53
+2025-04-21 23:02:59,421 - INFO - [Epoch 45] LR: 8.801577e-04 | Train loss: 168.4208, MAPE: 5.38, MSE: 168.55 | Val loss: 162.0997, MAPE: 5.21, MSE: 162.20
+2025-04-21 23:04:19,377 - INFO - [Epoch 46] LR: 8.750085e-04 | Train loss: 168.3916, MAPE: 5.37, MSE: 168.52 | Val loss: 162.7626, MAPE: 5.21, MSE: 162.86
+2025-04-21 23:05:38,228 - INFO - [Epoch 47] LR: 8.697666e-04 | Train loss: 168.1967, MAPE: 5.37, MSE: 168.33 | Val loss: 165.8098, MAPE: 5.23, MSE: 165.91
+2025-04-21 23:06:57,543 - INFO - [Epoch 48] LR: 8.644335e-04 | Train loss: 168.1317, MAPE: 5.37, MSE: 168.26 | Val loss: 163.4556, MAPE: 5.22, MSE: 163.56
+2025-04-21 23:08:16,501 - INFO - [Epoch 49] LR: 8.590104e-04 | Train loss: 167.8355, MAPE: 5.37, MSE: 167.96 | Val loss: 162.3269, MAPE: 5.19, MSE: 162.43
+2025-04-21 23:09:33,013 - INFO - [Epoch 50] LR: 8.534988e-04 | Train loss: 167.8969, MAPE: 5.37, MSE: 168.03 | Val loss: 163.6532, MAPE: 5.27, MSE: 163.75
+2025-04-21 23:10:49,477 - INFO - [Epoch 51] LR: 8.478998e-04 | Train loss: 167.6202, MAPE: 5.36, MSE: 167.75 | Val loss: 166.2475, MAPE: 5.26, MSE: 166.34
+2025-04-21 23:12:09,409 - INFO - [Epoch 52] LR: 8.422149e-04 | Train loss: 167.4167, MAPE: 5.36, MSE: 167.54 | Val loss: 164.7660, MAPE: 5.31, MSE: 164.86
+2025-04-21 23:12:09,505 - INFO - Final validation MSE: 164.864059
+2025-04-21 23:12:09,505 - INFO - 
+=== Best hyperparameters ===
+2025-04-21 23:12:09,505 - INFO - batch_size=3000, learning_rate=0.001, epochs=200,
+n_layers=4, hidden_layer_size=4096,
+dropout_rate=0.2, weight_decay=1e-05,
+n_normalizer_samples=10000, optimizer=adamw
+2025-04-21 23:12:09,505 - INFO - Lowest achieved validation MSE: 164.864059
+
+PtNet
+
+
+
+2025-04-22 22:56:34,126 - INFO - Loading data from: /scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root
+2025-04-22 22:56:35,008 - INFO - Data loaded successfully.
+2025-04-22 22:56:35,008 - INFO - 
+================================================================================
+2025-04-22 22:56:35,008 - INFO - [1/1] Training with hyperparameters:
+  batch_size=3000, learning_rate=0.001, epochs=200,
+  n_layers=4, hidden_layer_size=4096,
+  dropout_rate=0, weight_decay=0,
+  n_normalizer_samples=10000, optimizer=adamw
+2025-04-22 22:56:36,375 - INFO - Training model...
+2025-04-22 22:58:14,979 - INFO - [Epoch 1] LR: 9.999383e-04 | Train loss: 6128.8877, MAPE: 37.83, MSE: 6127.84 | Val loss: 232.9559, MAPE: 6.60, MSE: 233.06
+2025-04-22 22:59:38,626 - INFO - [Epoch 2] LR: 9.997532e-04 | Train loss: 197.2434, MAPE: 5.79, MSE: 197.39 | Val loss: 183.3967, MAPE: 5.51, MSE: 183.50
+2025-04-22 23:01:04,914 - INFO - [Epoch 3] LR: 9.994447e-04 | Train loss: 189.8697, MAPE: 5.66, MSE: 190.01 | Val loss: 177.6242, MAPE: 5.39, MSE: 177.73
+2025-04-22 23:02:30,502 - INFO - [Epoch 4] LR: 9.990130e-04 | Train loss: 185.9077, MAPE: 5.59, MSE: 186.05 | Val loss: 174.0977, MAPE: 5.36, MSE: 174.20
+2025-04-22 23:03:56,604 - INFO - [Epoch 5] LR: 9.984581e-04 | Train loss: 183.1205, MAPE: 5.54, MSE: 183.26 | Val loss: 172.7077, MAPE: 5.48, MSE: 172.81
+2025-04-22 23:05:22,839 - INFO - [Epoch 6] LR: 9.977801e-04 | Train loss: 180.9104, MAPE: 5.50, MSE: 181.05 | Val loss: 170.9615, MAPE: 5.44, MSE: 171.07
+2025-04-22 23:06:45,818 - INFO - [Epoch 7] LR: 9.969793e-04 | Train loss: 179.0214, MAPE: 5.47, MSE: 179.16 | Val loss: 172.3828, MAPE: 5.35, MSE: 172.48
+2025-04-22 23:08:08,974 - INFO - [Epoch 8] LR: 9.960558e-04 | Train loss: 177.4940, MAPE: 5.45, MSE: 177.63 | Val loss: 173.5383, MAPE: 5.34, MSE: 173.64
+2025-04-22 23:09:35,447 - INFO - [Epoch 9] LR: 9.950099e-04 | Train loss: 176.2150, MAPE: 5.43, MSE: 176.35 | Val loss: 174.6523, MAPE: 5.32, MSE: 174.75
+2025-04-22 23:11:01,315 - INFO - [Epoch 10] LR: 9.938418e-04 | Train loss: 175.1173, MAPE: 5.42, MSE: 175.25 | Val loss: 173.7314, MAPE: 5.32, MSE: 173.83
+2025-04-22 23:12:27,160 - INFO - [Epoch 11] LR: 9.925518e-04 | Train loss: 174.1875, MAPE: 5.41, MSE: 174.32 | Val loss: 172.2127, MAPE: 5.30, MSE: 172.31
+2025-04-22 23:13:54,874 - INFO - [Epoch 12] LR: 9.911401e-04 | Train loss: 173.3343, MAPE: 5.40, MSE: 173.47 | Val loss: 171.7915, MAPE: 5.27, MSE: 171.89
+2025-04-22 23:15:22,652 - INFO - [Epoch 13] LR: 9.896074e-04 | Train loss: 172.5848, MAPE: 5.39, MSE: 172.72 | Val loss: 172.0785, MAPE: 5.27, MSE: 172.18
+2025-04-22 23:16:47,895 - INFO - [Epoch 14] LR: 9.879537e-04 | Train loss: 171.8800, MAPE: 5.38, MSE: 172.02 | Val loss: 171.5243, MAPE: 5.27, MSE: 171.62
+2025-04-22 23:18:11,672 - INFO - [Epoch 15] LR: 9.861796e-04 | Train loss: 171.2961, MAPE: 5.38, MSE: 171.43 | Val loss: 170.9938, MAPE: 5.26, MSE: 171.09
+2025-04-22 23:19:38,318 - INFO - [Epoch 16] LR: 9.842855e-04 | Train loss: 170.7265, MAPE: 5.37, MSE: 170.86 | Val loss: 171.5090, MAPE: 5.26, MSE: 171.61
+2025-04-22 23:19:38,453 - INFO - Final validation MSE: 171.607346
+2025-04-22 23:19:38,454 - INFO - 
+=== Best hyperparameters ===
+2025-04-22 23:19:38,454 - INFO - batch_size=3000, learning_rate=0.001, epochs=200,
+n_layers=4, hidden_layer_size=4096,
+dropout_rate=0, weight_decay=0,
+n_normalizer_samples=10000, optimizer=adamw
+2025-04-22 23:19:38,454 - INFO - Lowest achieved validation MSE: 171.607346
+2025-04-22 23:20:51,338 - INFO - Loading data from: /scratch/ucjf-atlas/htautau/SM_Htautau_R22/V02_skim_mva_01/*/*/*/*/*H125*.root
+2025-04-22 23:20:52,243 - INFO - Data loaded successfully.
+2025-04-22 23:20:52,243 - INFO - 
+================================================================================
+2025-04-22 23:20:52,243 - INFO - [1/1] Training with hyperparameters:
+  batch_size=3000, learning_rate=0.001, epochs=200,
+  n_layers=4, hidden_layer_size=4096,
+  dropout_rate=0, weight_decay=0,
+  n_normalizer_samples=10000, optimizer=adamw
+2025-04-22 23:20:53,533 - INFO - Training model...
+2025-04-22 23:22:32,316 - INFO - [Epoch 1] LR: 9.999383e-04 | Train loss: 6215.0913, MAPE: 38.00, MSE: 6214.03 | Val loss: 203.9749, MAPE: 5.98, MSE: 204.07
+2025-04-22 23:23:57,588 - INFO - [Epoch 2] LR: 9.997532e-04 | Train loss: 198.1318, MAPE: 5.82, MSE: 198.28 | Val loss: 190.6403, MAPE: 5.72, MSE: 190.74
+2025-04-22 23:25:29,388 - INFO - [Epoch 3] LR: 9.994447e-04 | Train loss: 190.4083, MAPE: 5.67, MSE: 190.55 | Val loss: 178.5748, MAPE: 5.47, MSE: 178.68
+2025-04-22 23:26:56,524 - INFO - [Epoch 4] LR: 9.990130e-04 | Train loss: 186.1593, MAPE: 5.59, MSE: 186.30 | Val loss: 175.5327, MAPE: 5.40, MSE: 175.64
+2025-04-22 23:28:19,058 - INFO - [Epoch 5] LR: 9.984581e-04 | Train loss: 183.1427, MAPE: 5.54, MSE: 183.29 | Val loss: 173.5042, MAPE: 5.35, MSE: 173.61
+2025-04-22 23:29:42,445 - INFO - [Epoch 6] LR: 9.977801e-04 | Train loss: 180.7002, MAPE: 5.50, MSE: 180.84 | Val loss: 171.6609, MAPE: 5.38, MSE: 171.76
+2025-04-22 23:31:07,503 - INFO - [Epoch 7] LR: 9.969793e-04 | Train loss: 178.6857, MAPE: 5.47, MSE: 178.83 | Val loss: 170.2495, MAPE: 5.35, MSE: 170.35
+2025-04-22 23:32:29,259 - INFO - [Epoch 8] LR: 9.960558e-04 | Train loss: 177.0880, MAPE: 5.45, MSE: 177.23 | Val loss: 170.3510, MAPE: 5.32, MSE: 170.45
+2025-04-22 23:33:52,368 - INFO - [Epoch 9] LR: 9.950099e-04 | Train loss: 175.7765, MAPE: 5.44, MSE: 175.92 | Val loss: 171.1532, MAPE: 5.32, MSE: 171.25
+2025-04-22 23:35:15,427 - INFO - [Epoch 10] LR: 9.938418e-04 | Train loss: 174.6754, MAPE: 5.42, MSE: 174.81 | Val loss: 170.8676, MAPE: 5.30, MSE: 170.97
+2025-04-22 23:36:37,997 - INFO - [Epoch 11] LR: 9.925518e-04 | Train loss: 173.7935, MAPE: 5.41, MSE: 173.93 | Val loss: 169.6834, MAPE: 5.27, MSE: 169.78
+2025-04-22 23:37:59,363 - INFO - [Epoch 12] LR: 9.911401e-04 | Train loss: 173.0238, MAPE: 5.40, MSE: 173.16 | Val loss: 170.6752, MAPE: 5.28, MSE: 170.77
+2025-04-22 23:39:24,420 - INFO - [Epoch 13] LR: 9.896074e-04 | Train loss: 172.3120, MAPE: 5.39, MSE: 172.45 | Val loss: 170.2709, MAPE: 5.28, MSE: 170.37
+2025-04-22 23:40:50,954 - INFO - [Epoch 14] LR: 9.879537e-04 | Train loss: 171.6711, MAPE: 5.39, MSE: 171.81 | Val loss: 169.8405, MAPE: 5.27, MSE: 169.94
+2025-04-22 23:42:16,703 - INFO - [Epoch 15] LR: 9.861796e-04 | Train loss: 171.0941, MAPE: 5.38, MSE: 171.23 | Val loss: 168.9496, MAPE: 5.27, MSE: 169.05
+2025-04-22 23:43:39,819 - INFO - [Epoch 16] LR: 9.842855e-04 | Train loss: 170.5543, MAPE: 5.37, MSE: 170.69 | Val loss: 168.9629, MAPE: 5.27, MSE: 169.06
+2025-04-22 23:45:05,012 - INFO - [Epoch 17] LR: 9.822717e-04 | Train loss: 170.0623, MAPE: 5.37, MSE: 170.20 | Val loss: 169.5833, MAPE: 5.27, MSE: 169.68
+2025-04-22 23:46:29,600 - INFO - [Epoch 18] LR: 9.801391e-04 | Train loss: 169.5701, MAPE: 5.36, MSE: 169.70 | Val loss: 168.3923, MAPE: 5.26, MSE: 168.49
+2025-04-22 23:47:53,739 - INFO - [Epoch 19] LR: 9.778879e-04 | Train loss: 169.1291, MAPE: 5.36, MSE: 169.26 | Val loss: 167.3035, MAPE: 5.25, MSE: 167.40
+2025-04-22 23:49:18,510 - INFO - [Epoch 20] LR: 9.755188e-04 | Train loss: 168.6925, MAPE: 5.35, MSE: 168.82 | Val loss: 166.8007, MAPE: 5.26, MSE: 166.90
+2025-04-22 23:50:43,486 - INFO - [Epoch 21] LR: 9.730322e-04 | Train loss: 168.3012, MAPE: 5.35, MSE: 168.43 | Val loss: 167.1965, MAPE: 5.25, MSE: 167.30
+2025-04-22 23:52:07,363 - INFO - [Epoch 22] LR: 9.704289e-04 | Train loss: 167.8736, MAPE: 5.35, MSE: 168.01 | Val loss: 167.2508, MAPE: 5.25, MSE: 167.35
+2025-04-22 23:53:29,376 - INFO - [Epoch 23] LR: 9.677094e-04 | Train loss: 167.5125, MAPE: 5.34, MSE: 167.64 | Val loss: 166.3378, MAPE: 5.24, MSE: 166.44
+2025-04-22 23:54:52,008 - INFO - [Epoch 24] LR: 9.648746e-04 | Train loss: 167.1395, MAPE: 5.34, MSE: 167.27 | Val loss: 167.0598, MAPE: 5.25, MSE: 167.16
+2025-04-22 23:56:16,202 - INFO - [Epoch 25] LR: 9.619250e-04 | Train loss: 166.7859, MAPE: 5.34, MSE: 166.92 | Val loss: 166.8831, MAPE: 5.25, MSE: 166.98
+2025-04-22 23:57:39,995 - INFO - [Epoch 26] LR: 9.588613e-04 | Train loss: 166.4015, MAPE: 5.33, MSE: 166.53 | Val loss: 166.6589, MAPE: 5.24, MSE: 166.76
+2025-04-22 23:59:02,954 - INFO - [Epoch 27] LR: 9.556844e-04 | Train loss: 166.0348, MAPE: 5.33, MSE: 166.17 | Val loss: 166.2578, MAPE: 5.24, MSE: 166.35
+2025-04-23 00:00:26,486 - INFO - [Epoch 28] LR: 9.523951e-04 | Train loss: 165.7004, MAPE: 5.33, MSE: 165.83 | Val loss: 166.5516, MAPE: 5.22, MSE: 166.64
+2025-04-23 00:01:50,451 - INFO - [Epoch 29] LR: 9.489941e-04 | Train loss: 165.2961, MAPE: 5.32, MSE: 165.43 | Val loss: 166.1807, MAPE: 5.22, MSE: 166.28
+2025-04-23 00:03:15,456 - INFO - [Epoch 30] LR: 9.454822e-04 | Train loss: 164.9565, MAPE: 5.32, MSE: 165.09 | Val loss: 166.6440, MAPE: 5.21, MSE: 166.74
+2025-04-23 00:04:42,680 - INFO - [Epoch 31] LR: 9.418604e-04 | Train loss: 164.6606, MAPE: 5.32, MSE: 164.79 | Val loss: 166.4351, MAPE: 5.22, MSE: 166.53
+2025-04-23 00:06:09,889 - INFO - [Epoch 32] LR: 9.381295e-04 | Train loss: 164.2667, MAPE: 5.31, MSE: 164.40 | Val loss: 166.5918, MAPE: 5.22, MSE: 166.68
+2025-04-23 00:07:36,035 - INFO - [Epoch 33] LR: 9.342905e-04 | Train loss: 163.9296, MAPE: 5.31, MSE: 164.06 | Val loss: 166.3890, MAPE: 5.22, MSE: 166.48
+2025-04-23 00:09:00,274 - INFO - [Epoch 34] LR: 9.303443e-04 | Train loss: 163.6038, MAPE: 5.31, MSE: 163.74 | Val loss: 166.7582, MAPE: 5.22, MSE: 166.85
+2025-04-23 00:10:27,094 - INFO - [Epoch 35] LR: 9.262918e-04 | Train loss: 163.2695, MAPE: 5.31, MSE: 163.40 | Val loss: 166.6039, MAPE: 5.21, MSE: 166.70
+2025-04-23 00:11:53,765 - INFO - [Epoch 36] LR: 9.221341e-04 | Train loss: 162.9126, MAPE: 5.30, MSE: 163.05 | Val loss: 166.9596, MAPE: 5.21, MSE: 167.05
+2025-04-23 00:13:21,466 - INFO - [Epoch 37] LR: 9.178723e-04 | Train loss: 162.6196, MAPE: 5.30, MSE: 162.75 | Val loss: 167.4733, MAPE: 5.22, MSE: 167.57
+2025-04-23 00:14:43,498 - INFO - [Epoch 38] LR: 9.135073e-04 | Train loss: 162.2163, MAPE: 5.30, MSE: 162.35 | Val loss: 167.0615, MAPE: 5.22, MSE: 167.15
+2025-04-23 00:16:10,856 - INFO - [Epoch 39] LR: 9.090402e-04 | Train loss: 161.9855, MAPE: 5.30, MSE: 162.12 | Val loss: 168.6957, MAPE: 5.20, MSE: 168.78
+2025-04-23 00:16:11,011 - INFO - Final validation MSE: 168.784027
+2025-04-23 00:16:11,011 - INFO - 
+=== Best hyperparameters ===
+2025-04-23 00:16:11,011 - INFO - batch_size=3000, learning_rate=0.001, epochs=200,
+n_layers=4, hidden_layer_size=4096,
+dropout_rate=0, weight_decay=0,
+n_normalizer_samples=10000, optimizer=adamw
+2025-04-23 00:16:11,011 - INFO - Lowest achieved validation MSE: 168.784027
+
+PtNet_nodropout

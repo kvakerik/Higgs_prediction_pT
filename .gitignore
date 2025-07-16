@@ -19,6 +19,7 @@ models/
 *.pdf
 *.pth
 *.db
+*.png
 model_checkpoint/
 
 submit.sh
