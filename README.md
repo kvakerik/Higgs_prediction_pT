@@ -69,4 +69,7 @@ This code supports reproduction of results and figures presented in the thesis:
 **“Study of properties of the Higgs boson at the ATLAS Experiment”**  
 Erik Kvak, 2025
 
+This project was developed in collaboration with my thesis supervisor  
+**Mgr. Daniel Scheirich, Ph.D.**, and colleague **Patrik Ivan**.
+
 GitHub: [https://github.com/kvakerik/Higgs_prediction_pT](https://github.com/kvakerik/Higgs_prediction_pT)
