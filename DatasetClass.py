@@ -6,7 +6,7 @@ import vector
 import awkward as ak
 # import matplotlib.pyplot as plt 
 import numpy as np
-from src.helpers import pick_only_data, extract_data, make_filter_slice
+from helpers import pick_only_data, extract_data, make_filter_slice
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 os.environ["TF_USE_LEGACY_KERAS"] = "1"

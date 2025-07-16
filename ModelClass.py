@@ -10,7 +10,7 @@ from tensorflow.keras.optimizers import AdamW
 from tensorflow.keras.optimizers.schedules import CosineDecay
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.losses import MeanSquaredError, MeanAbsolutePercentageError
-from src.helpers import pick_only_data, EpochLogger
+from helpers import pick_only_data, EpochLogger
 import logging
 
 # Logger zapisuje len do súboru, nie do stdout
